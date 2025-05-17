@@ -19,6 +19,7 @@ import Home from './pages/Home';
 import Projects from './pages/Projects';
 import ProjectDetails from './pages/ProjectDetails';
 import FlowDetails from './pages/FlowDetails';
+import StepCreation from './pages/StepCreation';
 import Integrations from './pages/Integrations';
 import Settings from './pages/Settings';
 
@@ -41,6 +42,10 @@ export default function App() {
             <Route path="/projects" element={<Projects />} />
             <Route path="/projects/:id" element={<ProjectDetails />} />
             <Route path="/flows/:id" element={<FlowDetails />} />
+            <Route
+              path="/flows/:flowId/steps/create"
+              element={<StepCreation />}
+            />
             <Route path="/integrations" element={<Integrations />} />
             <Route path="/settings" element={<Settings />} />
           </Route>
