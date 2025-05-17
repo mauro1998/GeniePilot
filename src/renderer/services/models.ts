@@ -36,4 +36,5 @@ export interface Flow {
 export interface TreeNode {
   name: string; // Node display name
   children?: TreeNode[]; // Child nodes (if any)
+  id?: string; // Optional identifier for node (used for navigation)
 }

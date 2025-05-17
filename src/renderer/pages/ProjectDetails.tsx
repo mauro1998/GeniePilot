@@ -52,6 +52,8 @@ export default function ProjectDetails() {
   const handleFlowCreated = (newFlow: Flow) => {
     setFlows([...flows, newFlow]);
     setSelectedFlowId(newFlow.id);
+    navigate(`/flows/${newFlow.id}`);
+    notificationService.notify('success', 'Flow created successfully');
   };
 
   if (!project) {

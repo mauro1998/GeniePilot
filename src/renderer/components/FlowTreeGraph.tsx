@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { Button } from 'antd';
 import { ZoomInOutlined, ZoomOutOutlined } from '@ant-design/icons';
 import * as d3 from 'd3';
+import { useNavigate } from 'react-router-dom';
 import { Flow, Project, TreeNode } from '../services/models';
 
 interface FlowTreeGraphProps {
@@ -14,6 +15,7 @@ export default function FlowTreeGraph({ project, flows }: FlowTreeGraphProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [zoomLevel, setZoomLevel] = useState<number>(1);
   const zoomBehaviorRef = useRef<d3.ZoomBehavior<SVGSVGElement, unknown>>(null);
+  const navigate = useNavigate();
 
   // D3.js visualization
   useEffect(() => {
@@ -115,6 +117,8 @@ export default function FlowTreeGraph({ project, flows }: FlowTreeGraphProps) {
         children: flow.steps.map((step) => ({
           name: step.name,
         })),
+        // Add flow id to the data for click handling
+        id: flow.id,
       })),
     };
 
@@ -174,6 +178,20 @@ export default function FlowTreeGraph({ project, flows }: FlowTreeGraphProps) {
       .attr('stroke-width', 1.5)
       .attr('filter', 'drop-shadow(0px 2px 3px rgba(0, 0, 0, 0.4))');
 
+    // Add click event to flow nodes (depth 1)
+    node
+      .filter((d) => d.depth === 1)
+      .on('click', (event, d) => {
+        // Navigate to flow details page
+        const flowId = d.data.id;
+        if (flowId) {
+          navigate(`/flows/${flowId}`);
+        }
+      });
+
+    // Make flow nodes cursor pointer to indicate clickable
+    node.filter((d) => d.depth === 1).style('cursor', 'pointer');
+
     // Add labels to nodes - adjust position for vertical layout
     node
       .append('text')
@@ -196,7 +214,7 @@ export default function FlowTreeGraph({ project, flows }: FlowTreeGraphProps) {
     setTimeout(() => {
       centerGraph(svg, g, zoom, width, height);
     }, 50);
-  }, [flows, project]);
+  }, [flows, project, navigate]);
 
   // Function to handle zoom in/out buttons
   const handleZoom = (direction: 'in' | 'out') => {

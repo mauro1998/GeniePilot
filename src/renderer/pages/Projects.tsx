@@ -1,6 +1,7 @@
 import { PlusOutlined } from '@ant-design/icons';
 import { Button, Empty, Typography } from 'antd';
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import ProjectCard from '../components/ProjectCard';
 import ProjectFormDialog from '../components/ProjectFormDialog';
 import { Project } from '../services/models';
@@ -12,6 +13,7 @@ const { Title } = Typography;
 export default function Projects() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [projects, setProjects] = useState<Project[]>([]);
+  const navigate = useNavigate();
 
   // Load projects on component mount
   useEffect(() => {
@@ -20,6 +22,8 @@ export default function Projects() {
 
   const handleProjectCreated = (project: Project) => {
     setProjects([...projects, project]);
+    navigate(`/projects/${project.id}`);
+    notificationService.notify('success', 'Project created successfully');
   };
 
   const handleProjectDelete = (projectId: string) => {
