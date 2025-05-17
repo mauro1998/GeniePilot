@@ -5,12 +5,14 @@ interface CapturedImageViewerProps {
   imageData: string | null;
   onClose: () => void;
   onUse: () => void;
+  onRecapture: () => void;
 }
 
 const CapturedImageViewer: React.FC<CapturedImageViewerProps> = ({
   imageData,
   onClose,
-  onUse
+  onUse,
+  onRecapture
 }) => {
   if (!imageData) return null;
 
@@ -22,6 +24,9 @@ const CapturedImageViewer: React.FC<CapturedImageViewerProps> = ({
       footer={[
         <Button key="close" onClick={onClose}>
           Close
+        </Button>,
+        <Button key="recapture" onClick={onRecapture}>
+          Recapture
         </Button>,
         <Button
           key="use"

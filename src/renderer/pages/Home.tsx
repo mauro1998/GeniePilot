@@ -117,6 +117,10 @@ export default function Home() {
         imageData={capturedImage}
         onClose={() => setCapturedImage(null)}
         onUse={handleUseScreenshot}
+        onRecapture={() => {
+          setCapturedImage(null);
+          setIsCapturingModal(true);
+        }}
       />
     </div>
   );

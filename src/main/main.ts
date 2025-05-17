@@ -48,8 +48,8 @@ ipcMain.handle('screen-capturer:get-sources', async (_, sourceType: 'screen' | '
     const sources = await desktopCapturer.getSources({
       types,
       thumbnailSize: {
-        width: 320,
-        height: 180,
+        width: 640,
+        height: 360,
       },
       fetchWindowIcons: true,
     });
@@ -89,8 +89,8 @@ ipcMain.handle('screen-capturer:capture-screenshot', async (_, sourceId: string)
     const sources = await desktopCapturer.getSources({
       types: ['window', 'screen'],
       thumbnailSize: {
-        width: 128, // Use higher resolution for the actual capture
-        height: 62,
+        width: 1920, // Higher resolution for the actual capture
+        height: 1080,
       },
       fetchWindowIcons: true,
     });
