@@ -3,12 +3,12 @@ import { desktopCapturer, DesktopCapturerSource } from 'electron';
 /**
  * Interface representing a captured media source
  */
-interface CaptureSource {
+export interface CaptureSource {
   id: string;
   name: string;
-  thumbnail: Electron.NativeImage;
+  thumbnailDataUrl: string;
   display_id?: string;
-  appIcon?: Electron.NativeImage;
+  appIconDataUrl?: string;
   type: 'screen' | 'window';
 }
 

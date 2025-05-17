@@ -9,7 +9,7 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain } from 'electron';
+import { app, BrowserWindow, shell, ipcMain, desktopCapturer } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
@@ -29,6 +29,57 @@ ipcMain.on('ipc-example', async (event, arg) => {
   const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
   console.log(msgTemplate(arg));
   event.reply('ipc-example', msgTemplate('pong'));
+});
+
+// Screen capture IPC handlers
+ipcMain.handle('screen-capturer:get-sources', async (_, sourceType: 'screen' | 'window' | null = null) => {
+  try {
+    // Determine which types to request based on the sourceType parameter
+    const types: Array<'window' | 'screen'> = [];
+
+    if (sourceType === null || sourceType === 'window') {
+      types.push('window');
+    }
+
+    if (sourceType === null || sourceType === 'screen') {
+      types.push('screen');
+    }
+
+    const sources = await desktopCapturer.getSources({
+      types,
+      thumbnailSize: {
+        width: 320,
+        height: 180,
+      },
+      fetchWindowIcons: true,
+    });
+
+    // Convert NativeImage to data URLs for sending over IPC
+    return sources.map((source) => {
+      // Explicitly type the source type as a union type
+      const sourceType: 'screen' | 'window' = source.id.includes('screen') ? 'screen' : 'window';
+
+      return {
+        id: source.id,
+        name: source.name,
+        thumbnailDataUrl: source.thumbnail.toDataURL(),
+        display_id: source.display_id,
+        appIconDataUrl: source.appIcon ? source.appIcon.toDataURL() : undefined,
+        type: sourceType,
+      };
+    });
+  } catch (error) {
+    console.error('Error getting capture sources:', error);
+    throw error;
+  }
+});
+
+// This handler would be implemented later for screenshot functionality
+ipcMain.handle('screen-capturer:capture-screenshot', async (_, sourceId: string) => {
+  // In a full implementation, this would handle the capture process
+  // For now, return a placeholder response
+  console.log('Screenshot capture requested for source:', sourceId);
+  return { success: false, message: 'Screenshot capture not fully implemented yet' };
 });
 
 if (process.env.NODE_ENV === 'production') {

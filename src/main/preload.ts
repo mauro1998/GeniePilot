@@ -4,6 +4,16 @@ import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
 
 export type Channels = 'ipc-example';
 
+// Define capture source interface for TypeScript
+interface CaptureSource {
+  id: string;
+  name: string;
+  thumbnailDataUrl: string;
+  display_id?: string;
+  appIconDataUrl?: string;
+  type: 'screen' | 'window';
+}
+
 const electronHandler = {
   ipcRenderer: {
     sendMessage(channel: Channels, ...args: unknown[]) {
@@ -21,6 +31,12 @@ const electronHandler = {
     once(channel: Channels, func: (...args: unknown[]) => void) {
       ipcRenderer.once(channel, (_event, ...args) => func(...args));
     },
+  },
+  screenCapturer: {
+    getSources: (sourceType: 'screen' | 'window' | null = null) =>
+      ipcRenderer.invoke('screen-capturer:get-sources', sourceType),
+    captureScreenshot: (sourceId: string) =>
+      ipcRenderer.invoke('screen-capturer:capture-screenshot', sourceId),
   },
 };
 
