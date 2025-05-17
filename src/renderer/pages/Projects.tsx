@@ -1,42 +1,34 @@
-import React, { useState } from 'react';
-import { Typography, Button, Card, Empty, Modal, Form, Input } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
-import { useNavigate } from 'react-router-dom';
+import { Button, Empty, Typography } from 'antd';
+import React, { useEffect, useState } from 'react';
+import ProjectCard from '../components/ProjectCard';
+import ProjectFormDialog from '../components/ProjectFormDialog';
+import { Project } from '../services/models';
+import notificationService from '../services/notification_service';
+import storageService from '../services/storage_service';
 
-const { Title, Text } = Typography;
-
-interface Project {
-  id: string;
-  name: string;
-  description: string;
-}
+const { Title } = Typography;
 
 export default function Projects() {
-  const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [form] = Form.useForm();
+  const [projects, setProjects] = useState<Project[]>([]);
 
-  // Mock data - in a real app, this would come from a store or API
-  const [projects, setProjects] = useState<Project[]>([
-    // Uncomment for mock data
-    { id: '1', name: 'Project 1', description: 'Description for Project 1' },
-    { id: '2', name: 'Project 2', description: 'Description for Project 2' },
-  ]);
+  // Load projects on component mount
+  useEffect(() => {
+    setProjects(storageService.getProjects());
+  }, []);
 
-  const handleCreateProject = async () => {
+  const handleProjectCreated = (project: Project) => {
+    setProjects([...projects, project]);
+  };
+
+  const handleProjectDelete = (projectId: string) => {
     try {
-      const values = await form.validateFields();
-      const newProject: Project = {
-        id: Date.now().toString(), // Simple ID generation
-        name: values.name,
-        description: values.description || '',
-      };
-
-      setProjects([...projects, newProject]);
-      setIsModalOpen(false);
-      form.resetFields();
+      storageService.deleteProject(projectId);
+      setProjects(projects.filter((project) => project.id !== projectId));
+      notificationService.message('success', 'Project deleted successfully');
     } catch (error) {
-      console.error('Failed to create project:', error);
+      notificationService.handleError(error, 'Failed to delete project');
     }
   };
 
@@ -56,14 +48,12 @@ export default function Projects() {
       {projects.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {projects.map((project) => (
-            <Card
+            <ProjectCard
               key={project.id}
-              className="bg-[#1f1f1f] hover:shadow-md cursor-pointer"
-              onClick={() => navigate(`/projects/${project.id}`)}
-            >
-              <Title level={4}>{project.name}</Title>
-              <Text>{project.description}</Text>
-            </Card>
+              project={project}
+              onDelete={handleProjectDelete}
+              showActions
+            />
           ))}
         </div>
       ) : (
@@ -79,29 +69,11 @@ export default function Projects() {
         </div>
       )}
 
-      <Modal
-        title="Create New Project"
-        open={isModalOpen}
-        onOk={handleCreateProject}
-        onCancel={() => {
-          setIsModalOpen(false);
-          form.resetFields();
-        }}
-        okText="Create"
-      >
-        <Form form={form} layout="vertical" name="project_form">
-          <Form.Item
-            name="name"
-            label="Project Name"
-            rules={[{ required: true, message: 'Please enter a project name' }]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item name="description" label="Description">
-            <Input.TextArea rows={4} />
-          </Form.Item>
-        </Form>
-      </Modal>
+      <ProjectFormDialog
+        visible={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onProjectCreated={handleProjectCreated}
+      />
     </div>
   );
 }

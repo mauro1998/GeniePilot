@@ -1,8 +1,11 @@
 // filepath: /Users/daniel.meza/gl/hk-01/electron_react_boilerplate/src/renderer/pages/Home.tsx
-import React, { useState } from 'react';
-import { Typography, Button, Upload, Card, Empty, message } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Typography, Button, Upload, Empty, message } from 'antd';
 import { PlusCircleOutlined, InboxOutlined, DesktopOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import storageService from '../services/storage_service';
+import { Project } from '../services/models';
+import ProjectCard from '../components/ProjectCard';
 import CaptureScreen from '../components/CaptureScreen';
 import CapturedImageViewer from '../components/CapturedImageViewer';
 
@@ -13,13 +16,20 @@ export default function Home() {
   const navigate = useNavigate();
   const [isCapturingModal, setIsCapturingModal] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [recentProjects, setRecentProjects] = useState<Project[]>([]);
 
-  // Mock data for recent projects - in a real app, this would come from a store or API
-  const recentProjects: any[] = [
-    // Uncomment and modify if you want to show mock data
-    // { id: '1', name: 'Project 1', description: 'Description for Project 1' },
-    // { id: '2', name: 'Project 2', description: 'Description for Project 2' },
-  ];
+  useEffect(() => {
+    // Load recent projects from storage
+    setRecentProjects(storageService.getRecentProjects(5));
+  }, []);
+
+  const handleUpload = (file: any) => {
+    // Store the file temporarily (in a real app, you'd process this properly)
+    // For now, we'll navigate to create a new project
+    console.log('File selected:', file);
+    navigate('/projects');
+    return false; // Prevent default upload behavior
+  };
 
   const handleImageCaptured = (imageData: string, sourceName: string) => {
     setCapturedImage(imageData);
@@ -49,7 +59,7 @@ export default function Home() {
         <Dragger
           accept=".png,.jpg,.jpeg"
           showUploadList={false}
-          beforeUpload={() => false} // Prevent auto upload
+          beforeUpload={handleUpload}
           className="p-8 bg-[#141414] my-4"
         >
           <p className="text-6xl">
@@ -87,14 +97,7 @@ export default function Home() {
         {recentProjects.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {recentProjects.map((project) => (
-              <Card
-                key={project.id}
-                className="bg-[#1f1f1f] hover:shadow-md cursor-pointer"
-                onClick={() => navigate(`/projects/${project.id}`)}
-              >
-                <Title level={4}>{project.name}</Title>
-                <Text>{project.description}</Text>
-              </Card>
+              <ProjectCard key={project.id} project={project} />
             ))}
           </div>
         ) : (
