@@ -18,6 +18,7 @@ import SidebarLayout from './layout/SidebarLayout';
 import Home from './pages/Home';
 import Projects from './pages/Projects';
 import ProjectDetails from './pages/ProjectDetails';
+import FlowDetails from './pages/FlowDetails';
 import Integrations from './pages/Integrations';
 import Settings from './pages/Settings';
 
@@ -39,6 +40,7 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/projects" element={<Projects />} />
             <Route path="/projects/:id" element={<ProjectDetails />} />
+            <Route path="/flows/:id" element={<FlowDetails />} />
             <Route path="/integrations" element={<Integrations />} />
             <Route path="/settings" element={<Settings />} />
           </Route>
