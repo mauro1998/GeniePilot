@@ -1,13 +1,16 @@
-// filepath: /Users/daniel.meza/gl/hk-01/electron_react_boilerplate/src/renderer/pages/Home.tsx
-import React, { useState, useEffect } from 'react';
-import { Typography, Button, Upload, Empty, message } from 'antd';
-import { PlusCircleOutlined, InboxOutlined, DesktopOutlined } from '@ant-design/icons';
+import {
+  DesktopOutlined,
+  InboxOutlined,
+  PlusCircleOutlined,
+} from '@ant-design/icons';
+import { Button, Empty, message, Typography, Upload } from 'antd';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import storageService from '../services/storage_service';
-import { Project } from '../services/models';
-import ProjectCard from '../components/ProjectCard';
 import CaptureScreen from '../components/CaptureScreen';
 import CapturedImageViewer from '../components/CapturedImageViewer';
+import ProjectCard from '../components/ProjectCard';
+import { Project } from '../services/models';
+import storageService from '../services/storage_service';
 
 const { Title, Text } = Typography;
 const { Dragger } = Upload;
@@ -31,7 +34,7 @@ export default function Home() {
     return false; // Prevent default upload behavior
   };
 
-  const handleImageCaptured = (imageData: string, sourceName: string) => {
+  const handleImageCaptured = (imageData: string) => {
     setCapturedImage(imageData);
     setIsCapturingModal(false);
   };
