@@ -18,16 +18,14 @@ interface Source {
   type: 'screen' | 'window';
 }
 
-const CaptureScreen: React.FC<CaptureScreenProps> = ({ isOpen, onClose, onCapture }) => {
+export default function CaptureScreen({
+  isOpen,
+  onClose,
+  onCapture,
+}: CaptureScreenProps) {
   const [captureSources, setCaptureSources] = useState<Source[]>([]);
   const [selectedSource, setSelectedSource] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    if (isOpen) {
-      loadCaptureSources();
-    }
-  }, [isOpen]);
 
   const loadCaptureSources = async () => {
     setIsLoading(true);
@@ -37,10 +35,11 @@ const CaptureScreen: React.FC<CaptureScreenProps> = ({ isOpen, onClose, onCaptur
 
       // Check if thumbnails are present
       if (sources.length > 0) {
-        console.log('First source thumbnail:',
-          sources[0].thumbnailDataUrl ?
-          `Present (${sources[0].thumbnailDataUrl.substring(0, 30)}...)` :
-          'Missing'
+        console.log(
+          'First source thumbnail:',
+          sources[0].thumbnailDataUrl
+            ? `Present (${sources[0].thumbnailDataUrl.substring(0, 30)}...)`
+            : 'Missing',
         );
       }
 
@@ -56,6 +55,12 @@ const CaptureScreen: React.FC<CaptureScreenProps> = ({ isOpen, onClose, onCaptur
     }
   };
 
+  useEffect(() => {
+    if (isOpen) {
+      loadCaptureSources();
+    }
+  }, [isOpen]);
+
   const handleCapture = async () => {
     if (!selectedSource) {
       message.warning('Please select a source to capture');
@@ -65,7 +70,8 @@ const CaptureScreen: React.FC<CaptureScreenProps> = ({ isOpen, onClose, onCaptur
     setIsLoading(true);
     try {
       // Call the IPC method to capture the screenshot
-      const result = await window.electron.screenCapturer.captureScreenshot(selectedSource);
+      const result =
+        await window.electron.screenCapturer.captureScreenshot(selectedSource);
       console.log('Capture result:', result);
 
       if (result.success) {
@@ -106,7 +112,7 @@ const CaptureScreen: React.FC<CaptureScreenProps> = ({ isOpen, onClose, onCaptur
           Capture
         </Button>,
       ]}
-      width={600}
+      width={1024}
     >
       {isLoading ? (
         <div className="flex justify-center items-center py-8">
@@ -116,7 +122,9 @@ const CaptureScreen: React.FC<CaptureScreenProps> = ({ isOpen, onClose, onCaptur
       ) : (
         <>
           <div className="mb-4">
-            <Text className="text-lg mb-3 block">Select what you want to capture:</Text>
+            <Text className="text-lg mb-3 block">
+              Select what you want to capture:
+            </Text>
 
             <SourceSection
               title="Screens"
@@ -144,6 +152,4 @@ const CaptureScreen: React.FC<CaptureScreenProps> = ({ isOpen, onClose, onCaptur
       )}
     </Modal>
   );
-};
-
-export default CaptureScreen;
+}

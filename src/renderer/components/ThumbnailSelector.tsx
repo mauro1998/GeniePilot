@@ -18,11 +18,11 @@ interface ThumbnailSelectorProps {
   onClick: (id: string) => void;
 }
 
-const ThumbnailSelector: React.FC<ThumbnailSelectorProps> = ({
+export default function ThumbnailSelector({
   source,
   isSelected,
   onClick,
-}) => {
+}: ThumbnailSelectorProps) {
   const isScreen = source.type === 'screen';
   const Icon = isScreen ? DesktopOutlined : AppstoreOutlined;
 
@@ -30,7 +30,13 @@ const ThumbnailSelector: React.FC<ThumbnailSelectorProps> = ({
     console.error('Image loading error:', e);
     // Fallback to placeholder on error
     e.currentTarget.style.display = 'none';
-    e.currentTarget.parentElement?.classList.add('bg-gray-800', 'flex', 'items-center', 'justify-center', 'h-32');
+    e.currentTarget.parentElement?.classList.add(
+      'bg-gray-800',
+      'flex',
+      'items-center',
+      'justify-center',
+      'h-32',
+    );
     // Add icon
     const icon = document.createElement('span');
     icon.innerHTML = isScreen
@@ -38,7 +44,6 @@ const ThumbnailSelector: React.FC<ThumbnailSelectorProps> = ({
       : '<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M3 3h18v18H3V3m2 2v14h14V5H5z"></path></svg>';
     e.currentTarget.parentElement?.appendChild(icon);
   };
-
   return (
     <div
       className={`
@@ -47,6 +52,14 @@ const ThumbnailSelector: React.FC<ThumbnailSelectorProps> = ({
         hover:border-blue-400 transition-colors
       `}
       onClick={() => onClick(source.id)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          onClick(source.id);
+        }
+      }}
+      role="button"
+      tabIndex={0}
+      aria-pressed={isSelected}
     >
       {source.thumbnailDataUrl ? (
         <div className="relative">
@@ -56,7 +69,6 @@ const ThumbnailSelector: React.FC<ThumbnailSelectorProps> = ({
             className="w-full h-32 object-cover"
             onError={handleImageError}
           />
-
         </div>
       ) : (
         <div className="h-32 bg-gray-800 flex items-center justify-center">
@@ -66,7 +78,9 @@ const ThumbnailSelector: React.FC<ThumbnailSelectorProps> = ({
       <div className="p-2 bg-[#1f1f1f]">
         <div className="flex items-center">
           <Icon className="mr-2" />
-          <Text ellipsis className="text-sm">{source.name}</Text>
+          <Text ellipsis className="text-sm">
+            {source.name}
+          </Text>
           {source.appIconDataUrl && (
             <img
               src={source.appIconDataUrl}
@@ -78,6 +92,4 @@ const ThumbnailSelector: React.FC<ThumbnailSelectorProps> = ({
       </div>
     </div>
   );
-};
-
-export default ThumbnailSelector;
+}

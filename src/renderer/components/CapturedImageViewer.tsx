@@ -1,5 +1,5 @@
 import React from 'react';
-import { Typography, Button, Modal, message } from 'antd';
+import { Button, Modal } from 'antd';
 
 interface CapturedImageViewerProps {
   imageData: string | null;
@@ -8,12 +8,12 @@ interface CapturedImageViewerProps {
   onRecapture: () => void;
 }
 
-const CapturedImageViewer: React.FC<CapturedImageViewerProps> = ({
+function CapturedImageViewer({
   imageData,
   onClose,
   onUse,
-  onRecapture
-}) => {
+  onRecapture,
+}: CapturedImageViewerProps) {
   if (!imageData) return null;
 
   return (
@@ -23,17 +23,13 @@ const CapturedImageViewer: React.FC<CapturedImageViewerProps> = ({
       onCancel={onClose}
       footer={[
         <Button key="close" onClick={onClose}>
-          Close
+          Cancel
         </Button>,
         <Button key="recapture" onClick={onRecapture}>
-          Recapture
+          Take New Screenshot
         </Button>,
-        <Button
-          key="use"
-          type="primary"
-          onClick={onUse}
-        >
-          Use Screenshot
+        <Button key="use" type="primary" onClick={onUse}>
+          Save & Continue
         </Button>,
       ]}
       width={800}
@@ -48,6 +44,6 @@ const CapturedImageViewer: React.FC<CapturedImageViewerProps> = ({
       </div>
     </Modal>
   );
-};
+}
 
 export default CapturedImageViewer;
