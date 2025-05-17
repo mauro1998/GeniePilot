@@ -1,5 +1,5 @@
 import GherkinParser, { GherkinTestCase } from '../utils/gherkinParser';
-import AzureDevOpsService from '../services/azureDevOpsService';
+import AzureDevOpsService from '../renderer/services/azureDevOpsService';
 
 interface AzureDevOpsConfig {
   orgName: string;
