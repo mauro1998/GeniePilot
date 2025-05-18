@@ -71,6 +71,15 @@ export default function StepCreation() {
       // Validate form
       const values = await form.validateFields();
 
+      // Check if image is present
+      if (!currentStep.imageUrl) {
+        notificationService.notify(
+          'error',
+          'Screenshot is required. Please capture or upload an image.',
+        );
+        return;
+      }
+
       if (isEditing && editingStepId) {
         // Update existing step
         const stepToUpdate = steps.find((s) => s.id === editingStepId);
@@ -264,6 +273,7 @@ export default function StepCreation() {
               <Form.Item
                 label="Screenshot or Image"
                 className="image-selector-area"
+                required
               >
                 <ImageSelector
                   imageUrl={currentStep.imageUrl}
