@@ -4,13 +4,13 @@ This solution contains a simple ASP.NET Core-based file server for handling file
 
 ## Projects
 
-- **FileServer**: A .NET 9 web API for file management operations
+- **FileServer**: A .NET 8 web API for file management operations
 
 ## Getting Started
 
 ### Prerequisites
 
-- .NET 9 SDK (Preview)
+- .NET 8 SDK
 - Visual Studio 2022, VS Code, or Rider
 
 ### Building the Solution
