@@ -4,62 +4,98 @@ import { ipcMain, desktopCapturer, BrowserWindow } from 'electron';
  * Register screen capturer related IPC handlers
  */
 export const registerScreenCapturerHandlers = () => {
-  // Handler for getting available screen/window sources
-  ipcMain.handle('screen-capturer:get-sources', async (_, sourceType: 'screen' | 'window' | null) => {
-    try {
-      // Set types to capture based on the requested source type
-      const types: ('screen' | 'window')[] = sourceType
-        ? [sourceType]
-        : ['screen', 'window'];
 
-      // Get all available sources
-      const sources = await desktopCapturer.getSources({
-        types,
-        thumbnailSize: { width: 300, height: 300 },
-        fetchWindowIcons: true
-      });
+// Screen capture IPC handlers
+ipcMain.handle('screen-capturer:get-sources', async (_, sourceType: 'screen' | 'window' | null = null) => {
+  try {
+    // Determine which types to request based on the sourceType parameter
+    const types: Array<'window' | 'screen'> = [];
 
-      // Map sources to a simpler format for the renderer
-      return sources.map(source => ({
+    if (sourceType === null || sourceType === 'window') {
+      types.push('window');
+    }
+
+    if (sourceType === null || sourceType === 'screen') {
+      types.push('screen');
+    }
+
+    const sources = await desktopCapturer.getSources({
+      types,
+      thumbnailSize: {
+        width: 640,
+        height: 360,
+      },
+      fetchWindowIcons: true,
+    });
+
+    // Convert NativeImage to data URLs for sending over IPC
+    return sources.map((source) => {
+      // Explicitly type the source type as a union type
+      const sourceType: 'screen' | 'window' = source.id.includes('screen') ? 'screen' : 'window';
+
+      // Make sure to convert NativeImage to data URL
+      const thumbnailDataUrl = source.thumbnail ? source.thumbnail.toDataURL() : '';
+      const appIconDataUrl = source.appIcon ? source.appIcon.toDataURL() : undefined;
+
+      console.log(`Source: ${source.name}, Has thumbnail: ${!!source.thumbnail}, DataURL length: ${thumbnailDataUrl.length}`);
+
+      return {
         id: source.id,
         name: source.name,
-        thumbnailDataUrl: source.thumbnail.toDataURL(),
+        thumbnailDataUrl: thumbnailDataUrl,
         display_id: source.display_id,
-        appIconDataUrl: source.appIcon?.toDataURL(),
-        type: types.length === 1 ? types[0] : (source.display_id ? 'screen' : 'window')
-      }));
-    } catch (error) {
-      console.error('Error getting screen capture sources:', error);
-      throw error;
-    }
-  });
-
-  // Handler for capturing a screenshot of a specific source
-  ipcMain.handle('screen-capturer:capture-screenshot', async (_, sourceId: string) => {
-    try {
-      // Get the source with the requested ID
-      const sources = await desktopCapturer.getSources({
-        types: ['screen', 'window'],
-        thumbnailSize: { width: 1920, height: 1080 }, // Higher resolution for actual capture
-        fetchWindowIcons: false
-      });
-
-      // Find the requested source
-      const source = sources.find(s => s.id === sourceId);
-
-      if (!source) {
-        throw new Error(`Source with ID ${sourceId} not found`);
-      }
-
-      // Return the high-resolution thumbnail as a data URL
-      return {
-        dataUrl: source.thumbnail.toDataURL(),
-        name: source.name,
-        timestamp: new Date().toISOString()
+        appIconDataUrl: appIconDataUrl,
+        type: sourceType,
       };
-    } catch (error) {
-      console.error('Error capturing screenshot:', error);
-      throw error;
+    });
+  } catch (error) {
+    console.error('Error getting capture sources:', error);
+    throw error;
+  }
+});
+
+// This handler would be implemented later for screenshot functionality
+ipcMain.handle('screen-capturer:capture-screenshot', async (_, sourceId: string) => {
+  try {
+    console.log(`Capturing screenshot for source ID: ${sourceId}`);
+
+    // First, get the source to capture
+    const sources = await desktopCapturer.getSources({
+      types: ['window', 'screen'],
+      thumbnailSize: {
+        width: 1920, // Higher resolution for the actual capture
+        height: 1080,
+      },
+      fetchWindowIcons: true,
+    });
+
+    // Find the requested source
+    const sourceToCapture = sources.find(source => source.id === sourceId);
+    if (!sourceToCapture) {
+      console.log(`Source not found for ID: ${sourceId}`);
+      return {
+        success: false,
+        message: 'Source not found'
+      };
     }
-  });
+
+    console.log(`Source found: ${sourceToCapture.name}, capturing screenshot...`);
+
+    // Return the high-resolution thumbnail as a data URL
+    const dataUrl = sourceToCapture.thumbnail.toDataURL();
+    console.log(`Screenshot captured, data URL length: ${dataUrl.length}`);
+
+    return {
+      success: true,
+      data: dataUrl,
+      name: sourceToCapture.name
+    };
+  } catch (error) {
+    console.error('Error capturing screenshot:', error);
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'Unknown error occurred'
+    };
+  }
+});
 };
