@@ -5,7 +5,6 @@
     {
       "id": "parent-id",
       "name": "parent-scenario",
-      "description": "parent scenario description",
       "steps": [
         {
           "order": 1,
