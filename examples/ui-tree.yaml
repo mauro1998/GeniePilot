@@ -1,0 +1,53 @@
+type: container
+name: main_container
+children:
+  - type: container
+    name: chat_openai_section
+    children:
+      - type: text
+        name: title
+        content: "ChatOpenAI"
+      - type: input
+        name: model_name
+        label: "Model Name"
+        content: "gpt-4o-mini (latest)"
+      - type: input
+        name: temperature
+        label: "Temperature"
+        content: "0,9"
+      - type: checkbox
+        name: allow_image_uploads
+        label: "Allow Image Uploads"
+        required: false
+      - type: input
+        name: image_resolution
+        label: "Image Resolution"
+        content: "Auto"
+      - type: button
+        name: additional_parameters
+        content: "Additional Parameters"
+        action: open
+  - type: container
+    name: prompt_template_section
+    children:
+      - type: text
+        name: prompt_template_title
+        content: "Prompt Template"
+      - type: input
+        name: langchain_hub
+        label: "Langchain Hub"
+      - type: text
+        name: prompt_description
+        content: "You are a useful agent that converts visual layouts into structured UI trees."
+      - type: text
+        name: objective
+        content: "### Objective:"
+  - type: container
+    name: llm_chain_section
+    children:
+      - type: text
+        name: llm_chain_title
+        content: "LLM Chain"
+      - type: input
+        name: chain_name
+        label: "Chain Name"

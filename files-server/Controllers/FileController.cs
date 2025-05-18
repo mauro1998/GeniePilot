@@ -13,7 +13,6 @@ namespace FileServer.Controllers
     /// </summary>
     [ApiController]
     [Route("api/[controller]")]
-    [EnableCors("NgrokPolicy")]
     public class FileController : ControllerBase
     {
         private readonly FileStorageOptions _fileStorageOptions;

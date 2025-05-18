@@ -8,9 +8,8 @@ import { Flow, Step, Project } from '../services/models';
 import notificationService from '../services/notification_service';
 import storageService from '../services/storage_service';
 
-import { HttpFileService } from '../services/HttpFileService';
-
 import testSuiteService, {
+  TestSuiteData,
   TestSuiteState,
 } from '../services/test_suite_service';
 
@@ -25,39 +24,6 @@ export default function FlowDetails() {
   const [activeTab, setActiveTab] = useState<string>('steps');
   const [generationState, setGenerationState] =
     useState<TestSuiteState>('idle');
-
-  const handleGenerateTestSuite = async () => {
-    const fileService = new HttpFileService('https://cf67-134-238-186-21.ngrok-free.app');
-    try {
-      for (const step of steps) {
-        if (!step.imageUrl) {
-          throw new Error('Step image URL is missing');
-        }
-        const blob = await fetch(new URL(step.imageUrl)).then((r) => r.blob());
-        const fileUrl = await fileService.uploadFile(blob, step.id);
-        console.log(`Uploaded file for step ${step.id}, URL: ${fileUrl}`);
-      }
-    } catch (error) {
-      console.error('Error during test suite generation:', error);
-      notificationService.notify('error', 'Test suite generation failed', {
-        description: error instanceof Error ? error.message : String(error),
-      });
-    }
-  };
-
-  const testConnection = async () => {
-    try {
-      const fileService = new HttpFileService('https://cf67-134-238-186-21.ngrok-free.app');
-      const url = await fileService.testConnection();
-      notificationService.notify('success', 'Connection test successful', {
-        description: `File uploaded to: ${url}`
-      });
-    } catch (error) {
-      notificationService.notify('error', 'Connection test failed', {
-        description: error instanceof Error ? error.message : String(error)
-      });
-    }
-  };
 
   // Load flow and steps data on component mount
   useEffect(() => {
@@ -102,13 +68,18 @@ export default function FlowDetails() {
   useEffect(() => {
     if (!id) return;
 
-    const handleStateChange = (flowId: string, state: TestSuiteState) => {
+    const handleStateChange = (
+      flowId: string,
+      state: TestSuiteState,
+      data: TestSuiteData,
+    ) => {
       if (flowId === id) {
         setGenerationState(state);
 
         // Automatically switch to the test suite tab when generation completes
         if (state === 'completed' && activeTab !== 'testSuite') {
-          setActiveTab('testSuite');
+            setActiveTab('testSuite');
+
         }
       }
     };
@@ -128,7 +99,7 @@ export default function FlowDetails() {
 
   const handleGenerateTestSuite = () => {
     if (flow && id) {
-      testSuiteService.generateTestSuite(id);
+      testSuiteService.generateTestSuite(flow);
     }
   };
 
