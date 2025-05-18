@@ -51,8 +51,8 @@ class AzureDevOpsService {
       baseURL: this.baseUrl,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Basic ${Buffer.from(`:${this.personalAccessToken}`).toString('base64')}`
-      }
+        Authorization: `Basic ${Buffer.from(`:${this.personalAccessToken}`).toString('base64')}`,
+      },
     });
   }
 
@@ -63,7 +63,7 @@ class AzureDevOpsService {
   async getTestPlans(): Promise<any[]> {
     try {
       const response = await this.httpClient.get(
-        `/_apis/testplan/plans?api-version=${this.apiVersion}`
+        `/_apis/testplan/plans?api-version=${this.apiVersion}`,
       );
       return response.data.value;
     } catch (error) {
@@ -80,7 +80,7 @@ class AzureDevOpsService {
   async getTestPlan(planId: number): Promise<any> {
     try {
       const response = await this.httpClient.get(
-        `/_apis/testplan/plans/${planId}?api-version=${this.apiVersion}`
+        `/_apis/testplan/plans/${planId}?api-version=${this.apiVersion}`,
       );
       return response.data;
     } catch (error) {
@@ -98,7 +98,7 @@ class AzureDevOpsService {
     try {
       const response = await this.httpClient.post(
         `/_apis/testplan/plans?api-version=${this.apiVersion}`,
-        testPlan
+        testPlan,
       );
       return response.data;
     } catch (error) {
@@ -115,7 +115,7 @@ class AzureDevOpsService {
   async getTestSuites(planId: number): Promise<any[]> {
     try {
       const response = await this.httpClient.get(
-        `/_apis/testplan/plans/${planId}/suites?api-version=${this.apiVersion}`
+        `/_apis/testplan/plans/${planId}/suites?api-version=${this.apiVersion}`,
       );
       return response.data.value;
     } catch (error) {
@@ -134,7 +134,7 @@ class AzureDevOpsService {
     try {
       const response = await this.httpClient.post(
         `/_apis/testplan/plans/${planId}/suites?api-version=${this.apiVersion}`,
-        testSuite
+        testSuite,
       );
       return response.data;
     } catch (error) {
@@ -152,16 +152,16 @@ class AzureDevOpsService {
     try {
       const response = await this.httpClient.post(
         `/_apis/wit/workitems/$Test%20Case?api-version=${this.apiVersion}`,
-        testCase.fields.map(field => ({
+        testCase.fields.map((field) => ({
           op: 'add',
           path: `/fields/${field.name}`,
-          value: field.value
+          value: field.value,
         })),
         {
           headers: {
-            'Content-Type': 'application/json-patch+json'
-          }
-        }
+            'Content-Type': 'application/json-patch+json',
+          },
+        },
       );
       return response.data;
     } catch (error) {
@@ -177,11 +177,15 @@ class AzureDevOpsService {
    * @param {Array<number>} testCaseIds Test case IDs
    * @returns {Promise<Array>} Added test cases
    */
-  async addTestCasesToSuite(planId: number, suiteId: number, testCaseIds: number[]): Promise<any[]> {
+  async addTestCasesToSuite(
+    planId: number,
+    suiteId: number,
+    testCaseIds: number[],
+  ): Promise<any[]> {
     try {
       const response = await this.httpClient.post(
         `/_apis/testplan/plans/${planId}/suites/${suiteId}/testcases?api-version=${this.apiVersion}`,
-        testCaseIds.map(id => ({ id }))
+        testCaseIds.map((id) => ({ id })),
       );
       return response.data.value;
     } catch (error) {
@@ -203,17 +207,17 @@ class AzureDevOpsService {
       fields: [
         {
           name: 'System.Title',
-          value: gherkinTestCase.name
+          value: gherkinTestCase.name,
         },
         {
           name: 'System.Description',
-          value: gherkinTestCase.description
+          value: gherkinTestCase.description,
         },
         {
           name: 'Microsoft.VSTS.TCM.Steps',
-          value: stepsXml
-        }
-      ]
+          value: stepsXml,
+        },
+      ],
     };
   }
 
@@ -222,16 +226,18 @@ class AzureDevOpsService {
    * @param {Array} steps Test steps
    * @returns {string} XML formatted steps
    */
-  private formatTestSteps(steps: Array<{ type: string, text: string }>): string {
+  private formatTestSteps(
+    steps: Array<{ type: string; text: string }>,
+  ): string {
     let xml = '<?xml version="1.0" encoding="utf-8"?>';
     xml += '<TestSteps>';
 
     steps.forEach((step, index) => {
-      xml += '<step id="' + (index + 1) + '" type="ActionStep">';
-      xml += '<parameterizedString isformatted="true">';
+      xml += `<step id="${index + 1}" type="ActionStep">`;
+      xml += `<parameterizedString isformatted="true">`;
       xml += `<![CDATA[${step.type} ${step.text}]]>`;
       xml += '</parameterizedString>';
-      xml += '<parameterizedString isformatted="true">';
+      xml += `<parameterizedString isformatted="true">`;
       xml += '<![CDATA[]]>'; // Expected result is empty
       xml += '</parameterizedString>';
       xml += '</step>';

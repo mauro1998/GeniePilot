@@ -16,6 +16,7 @@ module.exports = {
     '@typescript-eslint/no-unused-vars': 'error',
     'no-console': 'off',
     'class-methods-use-this': 'off',
+    'lines-between-class-members': 'off',
   },
   parserOptions: {
     ecmaVersion: 2022,

@@ -7,7 +7,7 @@ import * as azdev from 'azure-devops-node-api';
 
 import { JsonPatchOperation, Operation } from 'azure-devops-node-api/interfaces/common/VSSInterfaces';
 import { TestPlanApi } from 'azure-devops-node-api/TestPlanApi';
-import { GherkinSummary as BaseGherkinSummary } from '../../renderer/services/gherkinImportService';
+import { GherkinSummary as BaseGherkinSummary } from '../../renderer/services/gherkin_import_service';
 import { TestPlanCreateParams, TestSuiteCreateParams, TestSuiteType } from 'azure-devops-node-api/interfaces/TestPlanInterfaces';
 import log from 'electron-log';
 import { AzureDevOpsConfig, AzureDevOpsImportOptions } from '../../renderer/integrations/AzureDevOpsIntegration';

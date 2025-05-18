@@ -94,19 +94,6 @@ export default function StepCreation() {
         // Update step in storage
         storageService.updateStep(updatedStep);
 
-        // Update flow with modified step
-        const updatedFlowSteps = flow.steps.map((s) =>
-          s.id === editingStepId ? updatedStep : s,
-        );
-
-        const updatedFlow = {
-          ...flow,
-          steps: updatedFlowSteps,
-        };
-
-        storageService.updateFlow(updatedFlow);
-        setFlow(updatedFlow);
-
         // Reset editing state
         setIsEditing(false);
         setEditingStepId(null);
@@ -116,34 +103,15 @@ export default function StepCreation() {
         // Create new step
         // Generate a name based on step index
         const stepNumber = steps.length + 1;
-        let generatedName = `Step ${stepNumber}`;
-
-        // Append preview of context if available
-        if (values.context) {
-          const contextPreview = values.context
-            .split(' ')
-            .slice(0, 3)
-            .join(' ');
-          if (contextPreview) {
-            generatedName += `: ${contextPreview}`;
-          }
-        }
+        const generatedName = `Step ${stepNumber}`;
 
         // Create step directly in storage
-        const newStep = storageService.saveStep({
+        storageService.saveStep({
           name: generatedName,
           flowId: flow.id,
           context: values.context || '',
           imageUrl: currentStep.imageUrl,
         });
-
-        // Update flow with new step
-        const updatedFlow = {
-          ...flow,
-          steps: [...flow.steps, newStep],
-        };
-        storageService.updateFlow(updatedFlow);
-        setFlow(updatedFlow);
 
         notificationService.notify('success', 'Step added successfully');
       }
@@ -203,14 +171,6 @@ export default function StepCreation() {
     try {
       // Remove step from storage
       storageService.deleteStep(stepId);
-
-      // Update flow
-      const updatedFlow = {
-        ...flow,
-        steps: flow.steps.filter((s) => s.id !== stepId),
-      };
-      storageService.updateFlow(updatedFlow);
-      setFlow(updatedFlow);
 
       // Refresh steps list
       refreshSteps();

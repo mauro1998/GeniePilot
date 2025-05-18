@@ -1,4 +1,7 @@
-import { BaseIntegrationConfig, ImportResult } from '../integrations/IntegrationProvider';
+import {
+  BaseIntegrationConfig,
+  ImportResult,
+} from '../integrations/IntegrationProvider';
 import integrationRegistry from '../integrations/IntegrationRegistry';
 
 // Import all available integrations
@@ -53,18 +56,23 @@ class GherkinImportService {
     providerId: string,
     config: BaseIntegrationConfig,
     directoryPath: string,
-    options: any
+    options: any,
   ): Promise<ImportResult> {
     try {
       const provider = integrationRegistry.getProvider(providerId);
 
       if (!provider) {
-        throw new Error(`Integration provider with ID '${providerId}' not found`);
+        throw new Error(
+          `Integration provider with ID '${providerId}' not found`,
+        );
       }
 
       return await provider.importGherkin(config, directoryPath, options);
     } catch (error) {
-      console.error(`Error importing Gherkin files with provider '${providerId}':`, error);
+      console.error(
+        `Error importing Gherkin files with provider '${providerId}':`,
+        error,
+      );
       throw error;
     }
   }

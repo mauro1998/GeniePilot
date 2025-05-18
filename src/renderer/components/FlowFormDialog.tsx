@@ -25,7 +25,6 @@ export default function FlowFormDialog({
       const newFlow = storageService.saveFlow({
         name: values.name,
         projectId,
-        steps: [],
       });
 
       onFlowCreated(newFlow);

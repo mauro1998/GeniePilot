@@ -3,14 +3,19 @@ import { Button } from 'antd';
 import { ZoomInOutlined, ZoomOutOutlined } from '@ant-design/icons';
 import * as d3 from 'd3';
 import { useNavigate } from 'react-router-dom';
-import { Flow, Project, TreeNode } from '../services/models';
+import { Flow, Project, Step, TreeNode } from '../services/models';
 
 interface FlowTreeGraphProps {
   project: Project;
   flows: Flow[];
+  steps: Step[];
 }
 
-export default function FlowTreeGraph({ project, flows }: FlowTreeGraphProps) {
+export default function FlowTreeGraph({
+  project,
+  flows,
+  steps,
+}: FlowTreeGraphProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [zoomLevel, setZoomLevel] = useState<number>(1);
@@ -114,9 +119,11 @@ export default function FlowTreeGraph({ project, flows }: FlowTreeGraphProps) {
       name: project.name,
       children: flows.map((flow) => ({
         name: flow.name,
-        children: flow.steps.map((step) => ({
-          name: step.name,
-        })),
+        children: steps
+          .filter((step) => step.flowId === flow.id)
+          .map((step) => ({
+            name: step.name,
+          })),
         // Add flow id to the data for click handling
         id: flow.id,
       })),
@@ -214,7 +221,7 @@ export default function FlowTreeGraph({ project, flows }: FlowTreeGraphProps) {
     setTimeout(() => {
       centerGraph(svg, g, zoom, width, height);
     }, 50);
-  }, [flows, project, navigate]);
+  }, [flows, steps, project, navigate]);
 
   // Function to handle zoom in/out buttons
   const handleZoom = (direction: 'in' | 'out') => {

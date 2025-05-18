@@ -26,7 +26,6 @@ export interface Flow {
   id: string; // Unique identifier
   name: string; // Flow name
   projectId: string; // Reference to parent project
-  steps: Step[]; // Steps included in this flow
   createdAt: number; // Timestamp when created
 }
 

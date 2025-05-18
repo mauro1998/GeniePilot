@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Typography, Form, Input, Button, Card, Table, Select, notification, Space, Divider, Modal, Tooltip, List, Tag, Tabs } from 'antd';
 import { PlusOutlined, CloudUploadOutlined, DeleteOutlined, SettingOutlined, QuestionCircleOutlined, FolderOpenOutlined } from '@ant-design/icons';
-import gherkinImportService, { GherkinSummary } from '../services/gherkinImportService';
+import gherkinImportService, { GherkinSummary } from '../services/gherkin_import_service';
 import integrationsManager from '../integrations/IntegrationsManager';
 import { IntegrationProvider, BaseIntegrationConfig } from '../integrations/IntegrationProvider';
 import GherkinImporter from '../components/GherkinImporter';
