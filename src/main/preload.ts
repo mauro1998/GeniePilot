@@ -1,4 +1,3 @@
-
 /* eslint no-unused-vars: off */
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
 
@@ -37,6 +36,18 @@ const electronHandler = {
       ipcRenderer.invoke('screen-capturer:get-sources', sourceType),
     captureScreenshot: (sourceId: string) =>
       ipcRenderer.invoke('screen-capturer:capture-screenshot', sourceId),
+  },
+  fileSystem: {
+    selectDirectory: () => ipcRenderer.invoke('file-system:select-directory'),
+    readDirectory: (dirPath: string) => ipcRenderer.invoke('file-system:read-directory', dirPath),
+  },
+  gherkin: {
+    scanDirectory: (directoryPath: string) =>
+      ipcRenderer.invoke('gherkin:scan-directory', directoryPath),
+    parseFile: (filePath: string) =>
+      ipcRenderer.invoke('gherkin:parse-file', filePath),
+    importToAzure: (config: any, directoryPath: string, options: any) =>
+      ipcRenderer.invoke('gherkin:import-to-azure', config, directoryPath, options),
   },
 };
 
