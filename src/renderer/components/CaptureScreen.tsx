@@ -10,7 +10,7 @@ interface CaptureScreenProps {
   onCapture: (imageData: string, sourceName: string) => void;
 }
 
-interface Source {
+export interface Source {
   id: string;
   name: string;
   thumbnailDataUrl?: string;
@@ -120,35 +120,27 @@ export default function CaptureScreen({
           <span className="ml-3">Loading sources...</span>
         </div>
       ) : (
-        <>
-          <div className="mb-4">
-            <Text className="text-lg mb-3 block">
-              Select what you want to capture:
-            </Text>
+        <div className="mb-4">
+          <Text className="text-lg mb-3 block">
+            Select the application you want to capture:
+          </Text>
 
-            <SourceSection
-              title="Screens"
-              sources={captureSources}
-              selectedSourceId={selectedSource}
-              onSourceSelect={setSelectedSource}
-              sourceType="screen"
-            />
+          <SourceSection
+            title="Screens"
+            sources={captureSources}
+            selectedSourceId={selectedSource}
+            onSourceSelect={setSelectedSource}
+            sourceType="screen"
+          />
 
-            <SourceSection
-              title="Windows"
-              sources={captureSources}
-              selectedSourceId={selectedSource}
-              onSourceSelect={setSelectedSource}
-              sourceType="window"
-            />
-          </div>
-          <div className="text-gray-400 text-sm">
-            <p>
-              <strong>Note:</strong> After capturing, the screenshot will be
-              loaded into your project workspace.
-            </p>
-          </div>
-        </>
+          <SourceSection
+            title="Windows"
+            sources={captureSources}
+            selectedSourceId={selectedSource}
+            onSourceSelect={setSelectedSource}
+            sourceType="window"
+          />
+        </div>
       )}
     </Modal>
   );

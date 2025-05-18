@@ -1,5 +1,5 @@
-import { PlusOutlined } from '@ant-design/icons';
-import { Button, Empty, Typography } from 'antd';
+import { PlusOutlined, ProjectOutlined } from '@ant-design/icons';
+import { Button, Empty, Typography, Divider } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ProjectCard from '../components/ProjectCard';
@@ -37,20 +37,28 @@ export default function Projects() {
   };
 
   return (
-    <div className="flex flex-col">
-      <div className="flex justify-between items-center mb-8">
-        <Title level={2}>Projects</Title>
+    <div className="flex flex-col h-full">
+      <div className="flex justify-between items-center mb-2">
+        <div className="flex items-center">
+          <ProjectOutlined className="text-2xl mr-2 text-blue-500" />
+          <Title level={2} className="!m-0">
+            Projects
+          </Title>
+        </div>
         <Button
           type="primary"
           icon={<PlusOutlined />}
           onClick={() => setIsModalOpen(true)}
+          size="large"
         >
           Create Project
         </Button>
       </div>
 
+      <Divider className="mt-0" />
+
       {projects.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-8">
           {projects.map((project) => (
             <ProjectCard
               key={project.id}
@@ -61,15 +69,20 @@ export default function Projects() {
           ))}
         </div>
       ) : (
-        <div className="text-center py-16">
+        <div className="text-center py-16 flex-grow flex flex-col items-center justify-center">
           <Empty
             description="No projects found"
             image={Empty.PRESENTED_IMAGE_SIMPLE}
+            className="mb-4"
+          />
+          <Button
+            type="primary"
+            onClick={() => setIsModalOpen(true)}
+            icon={<PlusOutlined />}
+            size="large"
           >
-            <Button type="primary" onClick={() => setIsModalOpen(true)}>
-              Create Your First Project
-            </Button>
-          </Empty>
+            Create Your First Project
+          </Button>
         </div>
       )}
 

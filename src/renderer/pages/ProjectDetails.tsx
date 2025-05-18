@@ -1,4 +1,4 @@
-import { PlusOutlined } from '@ant-design/icons';
+import { PlusOutlined, ProjectOutlined } from '@ant-design/icons';
 import { Button, Divider, Empty, Typography } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -63,9 +63,12 @@ export default function ProjectDetails() {
   return (
     <div className="flex flex-col flex-1">
       <div className="flex justify-between items-center">
-        <Title level={2} className="!m-0">
-          {project.name}
-        </Title>
+        <div className="flex items-center">
+          <ProjectOutlined className="text-2xl mr-2 text-blue-500" />
+          <Title level={2} className="!m-0">
+            {project.name} — Project
+          </Title>
+        </div>
         <Button
           type="primary"
           icon={<PlusOutlined />}

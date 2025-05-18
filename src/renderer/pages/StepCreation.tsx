@@ -181,19 +181,6 @@ export default function StepCreation() {
     return false; // Prevent default upload behavior
   };
 
-  const handleScreenCapture = () => {
-    // Empty handler for now - will be implemented later
-    console.log('Screen capture requested');
-
-    // For demonstration, we'll use a placeholder image
-    const fakeCaptureUrl =
-      'https://placehold.co/600x400/222/fff?text=Captured+Screen';
-    setCurrentStep({
-      ...currentStep,
-      imageUrl: fakeCaptureUrl,
-    });
-  };
-
   const handleClearImage = () => {
     setCurrentStep({
       ...currentStep,
@@ -280,7 +267,6 @@ export default function StepCreation() {
               >
                 <ImageSelector
                   imageUrl={currentStep.imageUrl}
-                  onCapture={handleScreenCapture}
                   onUpload={handleImageUpload}
                   onClear={handleClearImage}
                 />

@@ -15,7 +15,7 @@ export interface Step {
   id: string; // Unique identifier
   name: string; // Step name
   flowId: string; // Reference to parent flow
-  imageUrl?: string; // Optional path to step image
+  imageUrl?: string; // Optional url to S3 bucket image
   context?: string; // Optional description or context about the screenshot
 }
 
