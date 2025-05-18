@@ -7,6 +7,7 @@ import CapturedImageViewer from '../components/CapturedImageViewer';
 import ProjectCard from '../components/ProjectCard';
 import { Project } from '../services/models';
 import storageService from '../services/storage_service';
+import { base64ToFile } from '../services/util';
 
 const { Title, Text } = Typography;
 const { Dragger } = Upload;
@@ -34,10 +35,15 @@ export default function Home() {
     setIsCapturingModal(false);
   };
 
-  const handleUseScreenshot = () => {
-    // Here you would handle the captured image (save/process it)
-    message.success('Screenshot added to project');
-    setCapturedImage(null);
+  const handleCapturedScreenshotConfirmation = () => {
+    if (capturedImage) {
+      message.success('Screenshot added to project');
+      const file = base64ToFile(capturedImage, 'screenshot.png', 'image/png');
+      const blobUrl = URL.createObjectURL(file);
+      const flow = storageService.createDefaultFlow(blobUrl);
+      setCapturedImage(null);
+      navigate(`/flows/${flow.id}`);
+    }
   };
 
   const handleCaptureScreenLinkClick = (
@@ -126,7 +132,7 @@ export default function Home() {
       <CapturedImageViewer
         imageData={capturedImage}
         onClose={() => setCapturedImage(null)}
-        onUse={handleUseScreenshot}
+        onUse={handleCapturedScreenshotConfirmation}
         onRecapture={() => {
           setCapturedImage(null);
           setIsCapturingModal(true);

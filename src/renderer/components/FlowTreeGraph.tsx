@@ -1,21 +1,56 @@
-import React, { useRef, useState, useEffect } from 'react';
-import { Button } from 'antd';
-import { ZoomInOutlined, ZoomOutOutlined } from '@ant-design/icons';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
+import { Button, Tooltip } from 'antd';
+import {
+  ZoomInOutlined,
+  ZoomOutOutlined,
+  FullscreenOutlined,
+  InfoCircleOutlined,
+} from '@ant-design/icons';
 import * as d3 from 'd3';
 import { useNavigate } from 'react-router-dom';
-import { Flow, Project, TreeNode } from '../services/models';
+import { Flow, Project, Step, TreeNode } from '../services/models';
 
 interface FlowTreeGraphProps {
   project: Project;
   flows: Flow[];
+  steps: Step[];
 }
 
-export default function FlowTreeGraph({ project, flows }: FlowTreeGraphProps) {
+export default function FlowTreeGraph({
+  project,
+  flows,
+  steps,
+}: FlowTreeGraphProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [zoomLevel, setZoomLevel] = useState<number>(1);
+  const [selectedNode, setSelectedNode] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
   const zoomBehaviorRef = useRef<d3.ZoomBehavior<SVGSVGElement, unknown>>(null);
   const navigate = useNavigate();
+  const [showTooltip, setShowTooltip] = useState(false);
+  const [tooltipContent, setTooltipContent] = useState({
+    x: 0,
+    y: 0,
+    name: '',
+  });
+
+  // Color theme
+  const colors = useMemo(
+    () => ({
+      background: '#131722',
+      rootNode: '#4361ee',
+      flowNode: '#3a86ff',
+      stepNode: '#7209b7',
+      linkColor: '#6c757d',
+      linkHighlight: '#f8f9fa',
+      textPrimary: '#f8f9fa',
+      textShadow: '#000814',
+    }),
+    [],
+  );
 
   // D3.js visualization
   useEffect(() => {
@@ -38,6 +73,29 @@ export default function FlowTreeGraph({ project, flows }: FlowTreeGraphProps) {
 
     // Clear previous drawing
     svg.selectAll('*').remove();
+
+    // Add a subtle grid pattern
+    const defs = svg.append('defs');
+    const pattern = defs
+      .append('pattern')
+      .attr('id', 'grid')
+      .attr('width', 40)
+      .attr('height', 40)
+      .attr('patternUnits', 'userSpaceOnUse');
+
+    pattern
+      .append('path')
+      .attr('d', 'M 40 0 L 0 0 0 40')
+      .attr('fill', 'none')
+      .attr('stroke', 'rgba(255, 255, 255, 0.05)')
+      .attr('stroke-width', 1);
+
+    // Apply grid pattern
+    svg
+      .append('rect')
+      .attr('width', width)
+      .attr('height', height)
+      .attr('fill', 'url(#grid)');
 
     // Create a container group for zooming
     const container = svg.append('g');
@@ -70,9 +128,9 @@ export default function FlowTreeGraph({ project, flows }: FlowTreeGraphProps) {
 
       if (bounds) {
         // Calculate scale to fit the graph in the viewport with some padding
-        const padding = 40;
+        const padding = 60;
         const scale =
-          0.95 *
+          0.9 *
           Math.min(
             svgWidth / (bounds.width + padding),
             svgHeight / (bounds.height + padding),
@@ -114,21 +172,25 @@ export default function FlowTreeGraph({ project, flows }: FlowTreeGraphProps) {
       name: project.name,
       children: flows.map((flow) => ({
         name: flow.name,
-        children: flow.steps.map((step) => ({
-          name: step.name,
-        })),
+        children: steps
+          .filter((step) => step.flowId === flow.id)
+          .map((step) => ({
+            name: step.name,
+            id: step.id,
+            parentId: flow.id,
+          })),
         // Add flow id to the data for click handling
         id: flow.id,
       })),
     };
 
     // Calculate tree layout - vertical orientation
-    const horizontalPadding = 100;
-    const verticalPadding = 80;
+    const horizontalPadding = 150;
+    const verticalPadding = 130;
     const tree = d3
       .tree<TreeNode>()
       .size([width - horizontalPadding, height - verticalPadding])
-      .separation((a, b) => (a.parent === b.parent ? 1.8 : 2.5)); // Increased separation for better readability
+      .separation((a, b) => (a.parent === b.parent ? 2.5 : 3.2)); // Increased separation for better readability
 
     const root = d3.hierarchy<TreeNode>(treeData);
     const nodes = tree(root);
@@ -136,23 +198,43 @@ export default function FlowTreeGraph({ project, flows }: FlowTreeGraphProps) {
     // Create a group for the tree content
     const g = container.append('g');
 
+    // Add subtle curved links
     const linker = d3
       .linkVertical<d3.HierarchyLink<TreeNode>, d3.HierarchyNode<TreeNode>>()
-      // Use natural x,y coordinates for vertical layout
       .x((d) => d.x!)
       .y((d) => d.y!);
 
-    // Draw links
-    g.selectAll('.link')
+    // Add node links with animation
+    const links = g
+      .selectAll('.link')
       .data(nodes.links())
       .join('path')
       .attr('class', 'link')
       .attr('d', (d) => linker(d))
       .attr('fill', 'none')
-      .attr('stroke', '#888')
-      .attr('stroke-opacity', 0.8)
+      .attr('stroke', colors.linkColor)
+      .attr('stroke-opacity', 0.6)
       .attr('stroke-width', 2.5)
-      .attr('stroke-linecap', 'round');
+      .attr('stroke-linecap', 'round')
+      .style('transition', 'stroke 0.3s ease, stroke-opacity 0.3s ease')
+      .attr('stroke-dasharray', function () {
+        const element = this as SVGPathElement;
+        if (element) {
+          const length = element.getTotalLength();
+          return `${length} ${length}`;
+        }
+        return '';
+      })
+      .attr('stroke-dashoffset', function () {
+        const element = this as SVGPathElement;
+        if (element) {
+          return element.getTotalLength();
+        }
+        return 0;
+      });
+
+    // Animate links
+    links.transition().duration(1500).attr('stroke-dashoffset', 0);
 
     // Draw nodes
     const node = g
@@ -163,58 +245,144 @@ export default function FlowTreeGraph({ project, flows }: FlowTreeGraphProps) {
         'class',
         (d) => `node ${d.children ? 'node-internal' : 'node-leaf'}`,
       )
-      .attr('transform', (d) => `translate(${d.x},${d.y})`);
+      .attr('transform', (d) => `translate(${d.x},${d.y})`)
+      .style('cursor', 'pointer')
+      .on('mouseover', function (event, d) {
+        // Highlight connected links
+        g.selectAll('.link')
+          .filter((link) => {
+            const typedLink = link as d3.HierarchyLink<TreeNode>;
+            return typedLink.source === d || typedLink.target === d;
+          })
+          .transition()
+          .duration(300)
+          .attr('stroke', colors.linkHighlight)
+          .attr('stroke-opacity', 1)
+          .attr('stroke-width', 3);
 
-    // Add circles to nodes
-    node
-      .append('circle')
-      .attr('r', 10)
-      .attr('fill', (d) => {
-        if (d.depth === 0) return '#2f8bff';
-        if (d.depth === 1) return '#70e000';
-        return '#ffbe0b';
+        // Show tooltip
+        setTooltipContent({
+          x: event.pageX,
+          y: event.pageY,
+          name: d.data.name,
+        });
+        setShowTooltip(true);
       })
-      .attr('stroke', '#fff')
-      .attr('stroke-width', 1.5)
-      .attr('filter', 'drop-shadow(0px 2px 3px rgba(0, 0, 0, 0.4))');
+      .on('mouseout', function () {
+        // Reset link styles
+        g.selectAll('.link')
+          .transition()
+          .duration(300)
+          .attr('stroke', colors.linkColor)
+          .attr('stroke-opacity', 0.6)
+          .attr('stroke-width', 2.5);
 
-    // Add click event to flow nodes (depth 1)
-    node
-      .filter((d) => d.depth === 1)
-      .on('click', (event, d) => {
-        // Navigate to flow details page
-        const flowId = d.data.id;
-        if (flowId) {
-          navigate(`/flows/${flowId}`);
-        }
+        setShowTooltip(false);
       });
 
-    // Make flow nodes cursor pointer to indicate clickable
-    node.filter((d) => d.depth === 1).style('cursor', 'pointer');
+    // Add glowing effect for nodes
+    const glowFilter = defs
+      .append('filter')
+      .attr('id', 'glow')
+      .attr('x', '-50%')
+      .attr('y', '-50%')
+      .attr('width', '200%')
+      .attr('height', '200%');
 
-    // Add labels to nodes - adjust position for vertical layout
+    glowFilter
+      .append('feGaussianBlur')
+      .attr('stdDeviation', '2.5')
+      .attr('result', 'coloredBlur');
+
+    const feMerge = glowFilter.append('feMerge');
+    feMerge.append('feMergeNode').attr('in', 'coloredBlur');
+    feMerge.append('feMergeNode').attr('in', 'SourceGraphic');
+
+    // Add fancy node backgrounds
+    node
+      .append('circle')
+      .attr('r', (d) => (d.depth === 0 ? 18 : 15))
+      .attr('fill', (d) => {
+        if (d.depth === 0) return colors.rootNode;
+        if (d.depth === 1) return colors.flowNode;
+        return colors.stepNode;
+      })
+      .attr('stroke', '#ffffff')
+      .attr('stroke-width', 2)
+      .attr('filter', 'url(#glow)')
+      .style('transition', 'r 0.3s ease, fill 0.3s ease')
+      .on('mouseover', function () {
+        d3.select(this)
+          .transition()
+          .duration(300)
+          .attr('r', (d: any) => (d.depth === 0 ? 21 : 18))
+          .attr('stroke', '#ffffff')
+          .attr('stroke-width', 3);
+      })
+      .on('mouseout', function () {
+        d3.select(this)
+          .transition()
+          .duration(300)
+          .attr('r', (d: any) => (d.depth === 0 ? 18 : 15))
+          .attr('stroke', '#ffffff')
+          .attr('stroke-width', 2);
+      });
+
+    // Handle node click
+    node.on('click', (event, d) => {
+      if (d.depth === 0) {
+        // Project node - can show project details
+        return;
+      }
+
+      if (d.depth === 1 && d.data.id) {
+        // Flow node - navigate to flow details
+        setSelectedNode({ id: d.data.id, name: d.data.name });
+        navigate(`/flows/${d.data.id}`);
+      }
+
+      if (d.depth === 2 && d.data.id) {
+        // Step node - navigate to step details
+        setSelectedNode({ id: d.data.id, name: d.data.name });
+        navigate(`/flows/${d.data.parentId}/steps/configure`);
+      }
+    });
+
+    // Add text labels with better styling
     node
       .append('text')
-      .attr('dy', '2em')
+      .attr('dy', (d) => (d.depth === 2 ? '3.2em' : '3.6em'))
       .attr('x', 0)
       .attr('text-anchor', 'middle')
       .attr('font-weight', 'bold')
-      .attr('font-size', '12px')
+      .attr('font-size', (d) => (d.depth === 0 ? '15px' : '13px'))
+      .attr('fill', colors.textPrimary)
       .text((d) => {
         const { name } = d.data;
         return name.length > 15 ? `${name.substring(0, 12)}...` : name;
       })
-      .attr('fill', '#fff')
-      .clone(true)
-      .lower()
-      .attr('stroke', '#141414')
-      .attr('stroke-width', 4);
+      .attr('filter', 'drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.8))');
+
+    // Add icons to nodes
+    node
+      .append('text')
+      .attr('dy', '0.5em')
+      .attr('x', 0)
+      .attr('text-anchor', 'middle')
+      .attr('font-family', 'FontAwesome')
+      .attr('font-size', (d) => (d.depth === 0 ? '14px' : '12px'))
+      .attr('fill', '#ffffff')
+      .text((d) => {
+        if (d.depth === 0) return 'P'; // Project icon
+        if (d.depth === 1) return 'F'; // Flow icon
+        return '▶'; // Step icon
+      });
 
     // Add a delay to ensure all DOM elements are rendered before centering
     setTimeout(() => {
       centerGraph(svg, g, zoom, width, height);
     }, 50);
-  }, [flows, project, navigate]);
+  }, [flows, steps, project, navigate, colors]);
 
   // Function to handle zoom in/out buttons
   const handleZoom = (direction: 'in' | 'out') => {
@@ -251,9 +419,9 @@ export default function FlowTreeGraph({ project, flows }: FlowTreeGraphProps) {
 
     if (bounds) {
       // Calculate scale to fit the graph in the viewport with some padding
-      const padding = 40;
+      const padding = 60;
       const scale =
-        0.95 *
+        0.9 *
         Math.min(
           svgWidth / (bounds.width + padding),
           svgHeight / (bounds.height + padding),
@@ -299,24 +467,104 @@ export default function FlowTreeGraph({ project, flows }: FlowTreeGraphProps) {
     centerGraph(svg, container, zoom, width, height);
   };
 
+  // Toggle fullscreen mode
+  const toggleFullscreen = () => {
+    if (!containerRef.current) return;
+
+    if (!document.fullscreenElement) {
+      containerRef.current.requestFullscreen().catch((err) => {
+        console.error(`Error attempting to enable fullscreen: ${err.message}`);
+      });
+    } else {
+      document.exitFullscreen();
+    }
+  };
+
   return (
     <div ref={containerRef} className="w-full h-full relative flex flex-col">
-      <div className="absolute top-2 right-2 z-10 space-x-2">
-        <Button
-          icon={<ZoomOutOutlined />}
-          onClick={() => handleZoom('out')}
-          disabled={zoomLevel <= 0.2}
-        />
-        <Button
-          icon={<ZoomInOutlined />}
-          onClick={() => handleZoom('in')}
-          disabled={zoomLevel >= 3.8}
-        />
-        <Button onClick={handleCenterGraph}>Center</Button>
+      {/* Control panel */}
+      <div className="absolute top-3 right-3 z-10 flex flex-col gap-2">
+        <div className="flex items-center bg-black/40 rounded-lg p-1 backdrop-blur-sm">
+          <Tooltip title="Zoom In">
+            <Button
+              type="text"
+              icon={<ZoomInOutlined className="text-white" />}
+              onClick={() => handleZoom('in')}
+              disabled={zoomLevel >= 3.8}
+              className="hover:bg-white/20"
+            />
+          </Tooltip>
+          <Tooltip title="Zoom Out">
+            <Button
+              type="text"
+              icon={<ZoomOutOutlined className="text-white" />}
+              onClick={() => handleZoom('out')}
+              disabled={zoomLevel <= 0.2}
+              className="hover:bg-white/20"
+            />
+          </Tooltip>
+          <Tooltip title="Center Graph">
+            <Button
+              type="text"
+              onClick={handleCenterGraph}
+              className="text-white hover:bg-white/20"
+            >
+              Center
+            </Button>
+          </Tooltip>
+          <Tooltip title="Fullscreen">
+            <Button
+              type="text"
+              icon={<FullscreenOutlined className="text-white" />}
+              onClick={toggleFullscreen}
+              className="hover:bg-white/20"
+            />
+          </Tooltip>
+        </div>
+
+        {selectedNode && (
+          <div className="bg-black/40 text-white rounded-lg p-2 backdrop-blur-sm max-w-[200px]">
+            <div className="text-sm font-bold flex items-center gap-1">
+              <InfoCircleOutlined /> Selected Node
+            </div>
+            <div className="text-xs opacity-90 truncate">
+              {selectedNode.name}
+            </div>
+          </div>
+        )}
       </div>
-      <svg ref={svgRef} className="bg-[#141414] rounded-lg w-full h-full" />
-      <div className="absolute bottom-2 right-2 bg-black/50 text-white px-2 py-1 rounded">
+
+      {/* Main SVG graph */}
+      <svg
+        ref={svgRef}
+        className="w-full h-full rounded-lg"
+        style={{ background: colors.background }}
+      />
+
+      {/* Custom tooltip */}
+      {showTooltip && (
+        <div
+          className="fixed z-50 bg-black/80 text-white px-3 py-2 rounded-lg shadow-lg backdrop-blur-sm"
+          style={{
+            left: `${tooltipContent.x + 10}px`,
+            top: `${tooltipContent.y - 40}px`,
+            transition: 'all 0.2s ease-out',
+            pointerEvents: 'none',
+          }}
+        >
+          <div className="font-bold">{tooltipContent.name}</div>
+        </div>
+      )}
+
+      {/* Zoom indicator */}
+      <div className="absolute bottom-3 right-3 bg-black/40 text-white px-3 py-1 rounded-lg backdrop-blur-sm flex items-center gap-2">
+        <ZoomInOutlined />
         {Math.round(zoomLevel * 100)}%
+      </div>
+
+      {/* Instruction hint */}
+      <div className="absolute bottom-3 left-3 bg-black/40 text-white/80 px-3 py-1 rounded-lg backdrop-blur-sm text-xs">
+        Double-click to center • Click node to navigate
       </div>
     </div>
   );

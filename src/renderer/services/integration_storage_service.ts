@@ -18,9 +18,15 @@ class IntegrationStorageService {
     try {
       const configs = this.getIntegrationConfigs();
       configs[providerId] = config;
-      localStorage.setItem(this.INTEGRATION_CONFIG_KEY, JSON.stringify(configs));
+      localStorage.setItem(
+        this.INTEGRATION_CONFIG_KEY,
+        JSON.stringify(configs),
+      );
     } catch (error) {
-      console.error(`Error saving integration config for provider ${providerId}:`, error);
+      console.error(
+        `Error saving integration config for provider ${providerId}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -35,10 +41,16 @@ class IntegrationStorageService {
       const configs = this.getIntegrationConfigs();
       if (configs[providerId]) {
         delete configs[providerId];
-        localStorage.setItem(this.INTEGRATION_CONFIG_KEY, JSON.stringify(configs));
+        localStorage.setItem(
+          this.INTEGRATION_CONFIG_KEY,
+          JSON.stringify(configs),
+        );
       }
     } catch (error) {
-      console.error(`Error deleting integration config for provider ${providerId}:`, error);
+      console.error(
+        `Error deleting integration config for provider ${providerId}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -51,7 +63,10 @@ class IntegrationStorageService {
 
   saveAzureDevOpsProjects(projects: any[]): void {
     try {
-      localStorage.setItem(this.AZURE_DEVOPS_PROJECTS_KEY, JSON.stringify(projects));
+      localStorage.setItem(
+        this.AZURE_DEVOPS_PROJECTS_KEY,
+        JSON.stringify(projects),
+      );
     } catch (error) {
       console.error('Error saving Azure DevOps projects:', error);
       throw error;
@@ -63,7 +78,7 @@ class IntegrationStorageService {
       const projects = this.getAzureDevOpsProjects();
       const newProject = {
         ...project,
-        id: project.id ?? uuidv4()
+        id: project.id ?? uuidv4(),
       };
       projects.push(newProject);
       this.saveAzureDevOpsProjects(projects);
@@ -83,7 +98,10 @@ class IntegrationStorageService {
         this.saveAzureDevOpsProjects(projects);
       }
     } catch (error) {
-      console.error(`Error updating Azure DevOps project with ID ${project.id}:`, error);
+      console.error(
+        `Error updating Azure DevOps project with ID ${project.id}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -94,7 +112,10 @@ class IntegrationStorageService {
       const filteredProjects = projects.filter((p: any) => p.id !== id);
       this.saveAzureDevOpsProjects(filteredProjects);
     } catch (error) {
-      console.error(`Error deleting Azure DevOps project with ID ${id}:`, error);
+      console.error(
+        `Error deleting Azure DevOps project with ID ${id}:`,
+        error,
+      );
       throw error;
     }
   }

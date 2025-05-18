@@ -1,5 +1,5 @@
-import GherkinParser, { GherkinTestCase } from '../utils/gherkinParser';
-import AzureDevOpsService from '../renderer/services/azureDevOpsService';
+import GherkinParser from '../utils/gherkin_parser';
+import AzureDevOpsService from '../renderer/services/azure_devops_service';
 
 interface AzureDevOpsConfig {
   orgName: string;
@@ -49,7 +49,10 @@ class GherkinToAzureDevOpsImporter {
    * @param {ImportOptions} options Import options
    * @returns {Promise<ImportResults>} Import results
    */
-  async importFromDirectory(gherkinDir: string, options: ImportOptions = {}): Promise<ImportResults> {
+  async importFromDirectory(
+    gherkinDir: string,
+    options: ImportOptions = {},
+  ): Promise<ImportResults> {
     try {
       console.log(`Importing Gherkin files from ${gherkinDir}...`);
 
@@ -58,7 +61,8 @@ class GherkinToAzureDevOpsImporter {
       console.log(`Found ${parsedFiles.length} Gherkin files.`);
 
       // Get or create test plan
-      let planId = options.planId;
+      let { planId } = options;
+
       if (!planId) {
         if (!options.planName) {
           throw new Error('Either planId or planName must be provided');
@@ -66,11 +70,13 @@ class GherkinToAzureDevOpsImporter {
 
         const newPlan = await this.azureService.createTestPlan({
           name: options.planName,
-          description: 'Imported from Gherkin files'
+          description: 'Imported from Gherkin files',
         });
 
         planId = newPlan.id;
-        console.log(`Created new test plan: ${options.planName} (ID: ${planId})`);
+        console.log(
+          `Created new test plan: ${options.planName} (ID: ${planId})`,
+        );
       } else {
         console.log(`Using existing test plan ID: ${planId}`);
       }
@@ -81,7 +87,8 @@ class GherkinToAzureDevOpsImporter {
       }
 
       // Get or create test suite
-      let suiteId = options.suiteId;
+      let { suiteId } = options;
+
       if (!suiteId) {
         if (!options.suiteName) {
           throw new Error('Either suiteId or suiteName must be provided');
@@ -89,11 +96,13 @@ class GherkinToAzureDevOpsImporter {
 
         const newSuite = await this.azureService.createTestSuite(planId, {
           name: options.suiteName,
-          suiteType: 'StaticTestSuite'
+          suiteType: 'StaticTestSuite',
         });
 
         suiteId = newSuite.id;
-        console.log(`Created new test suite: ${options.suiteName} (ID: ${suiteId})`);
+        console.log(
+          `Created new test suite: ${options.suiteName} (ID: ${suiteId})`,
+        );
       } else {
         console.log(`Using existing test suite ID: ${suiteId}`);
       }
@@ -107,7 +116,7 @@ class GherkinToAzureDevOpsImporter {
       const results: ImportResults = {
         planId,
         suiteId,
-        importedTestCases: []
+        importedTestCases: [],
       };
 
       for (const file of parsedFiles) {
@@ -125,22 +134,29 @@ class GherkinToAzureDevOpsImporter {
           const formattedTestCase = this.azureService.formatTestCase(testCase);
 
           // Create test case
-          const createdTestCase = await this.azureService.createTestCase(formattedTestCase);
+          const createdTestCase =
+            await this.azureService.createTestCase(formattedTestCase);
 
           // Add test case to suite
-          await this.azureService.addTestCasesToSuite(planId, suiteId, [createdTestCase.id]);
+          await this.azureService.addTestCasesToSuite(planId, suiteId, [
+            createdTestCase.id,
+          ]);
 
           results.importedTestCases.push({
             name: testCase.name,
             id: createdTestCase.id,
-            url: createdTestCase._links.html.href
+            url: createdTestCase._links.html.href,
           });
 
-          console.log(`Test case created: ${testCase.name} (ID: ${createdTestCase.id})`);
+          console.log(
+            `Test case created: ${testCase.name} (ID: ${createdTestCase.id})`,
+          );
         }
       }
 
-      console.log(`Import completed. Imported ${results.importedTestCases.length} test cases.`);
+      console.log(
+        `Import completed. Imported ${results.importedTestCases.length} test cases.`,
+      );
       return results;
     } catch (error) {
       console.error('Error importing Gherkin files:', error);

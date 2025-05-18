@@ -194,7 +194,6 @@ class StorageService {
     const flow = this.saveFlow({
       projectId: project.id,
       name: 'Main Flow',
-      steps: [],
     });
 
     // Create step

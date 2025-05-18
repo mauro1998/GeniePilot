@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import FlowFormDialog from '../components/FlowFormDialog';
 import FlowTreeGraph from '../components/FlowTreeGraph';
-import { Flow, Project } from '../services/models';
+import { Flow, Project, Step } from '../services/models';
 import notificationService from '../services/notification_service';
 import storageService from '../services/storage_service';
 
@@ -15,6 +15,7 @@ export default function ProjectDetails() {
   const navigate = useNavigate();
   const [project, setProject] = useState<Project | null>(null);
   const [flows, setFlows] = useState<Flow[]>([]);
+  const [steps, setSteps] = useState<Step[]>([]);
   const [isFlowModalOpen, setIsFlowModalOpen] = useState(false);
   const [selectedFlowId, setSelectedFlowId] = useState<string | null>(null);
 
@@ -35,6 +36,11 @@ export default function ProjectDetails() {
       setProject(foundProject);
       const projectFlows = storageService.getFlowsByProject(id);
       setFlows(projectFlows);
+
+      const projectSteps = storageService
+        .getSteps()
+        .filter((step) => projectFlows.some((flow) => flow.id === step.flowId));
+      setSteps(projectSteps);
 
       // Select the first flow by default if available
       if (projectFlows.length > 0 && !selectedFlowId) {
@@ -82,7 +88,7 @@ export default function ProjectDetails() {
 
       <div className="flex-1">
         {flows.length > 0 ? (
-          <FlowTreeGraph project={project} flows={flows} />
+          <FlowTreeGraph project={project} flows={flows} steps={steps} />
         ) : (
           <Empty
             description="No flows found"
