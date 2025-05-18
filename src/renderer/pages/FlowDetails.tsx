@@ -18,15 +18,21 @@ export default function FlowDetails() {
 
   const handleGenerateTestSuite = async () => {
     const fileService = new HttpFileService('https://cf67-134-238-186-21.ngrok-free.app');
-
+    try {
       for (const step of steps) {
-        if(!step.imageUrl) {
+        if (!step.imageUrl) {
           throw new Error('Step image URL is missing');
         }
         const blob = await fetch(new URL(step.imageUrl)).then((r) => r.blob());
         const fileUrl = await fileService.uploadFile(blob, step.id);
         console.log(`Uploaded file for step ${step.id}, URL: ${fileUrl}`);
       }
+    } catch (error) {
+      console.error('Error during test suite generation:', error);
+      notificationService.notify('error', 'Test suite generation failed', {
+        description: error instanceof Error ? error.message : String(error),
+      });
+    }
   };
 
   const testConnection = async () => {
