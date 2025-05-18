@@ -1,4 +1,4 @@
-import GherkinParser from '../utils/gherkinParser';
+import GherkinParser from '../utils/gherkin_parser';
 import AzureDevOpsService from '../renderer/services/azure_devops_service';
 
 interface AzureDevOpsConfig {

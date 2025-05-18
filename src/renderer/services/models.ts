@@ -33,7 +33,8 @@ export interface Flow {
  * TreeNode used for hierarchical visualization of projects and flows
  */
 export interface TreeNode {
+  id?: string; // Optional identifier for node (used for navigation)
+  parentId?: string; // Optional parent identifier for node (used for navigation)
   name: string; // Node display name
   children?: TreeNode[]; // Child nodes (if any)
-  id?: string; // Optional identifier for node (used for navigation)
 }

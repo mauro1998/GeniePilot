@@ -43,7 +43,7 @@ export default function App() {
             <Route path="/projects/:id" element={<ProjectDetails />} />
             <Route path="/flows/:id" element={<FlowDetails />} />
             <Route
-              path="/flows/:flowId/steps/create"
+              path="/flows/:flowId/steps/configure"
               element={<StepCreation />}
             />
             <Route path="/integrations" element={<Integrations />} />

@@ -17,6 +17,7 @@ module.exports = {
     'no-console': 'off',
     'class-methods-use-this': 'off',
     'lines-between-class-members': 'off',
+    'func-names': 'off',
   },
   parserOptions: {
     ecmaVersion: 2022,

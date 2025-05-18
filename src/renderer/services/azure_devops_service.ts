@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
-import { GherkinTestCase } from '../../utils/gherkinParser';
+import { GherkinTestCase } from '../../utils/gherkin_parser';
 
 interface AzureDevOpsConfig {
   orgName: string;

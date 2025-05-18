@@ -52,7 +52,7 @@ export default function FlowDetails() {
 
   const goToStepCreation = () => {
     if (flow) {
-      navigate(`/flows/${flow.id}/steps/create`);
+      navigate(`/flows/${flow.id}/steps/configure`);
     }
   };
 
