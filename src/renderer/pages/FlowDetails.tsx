@@ -1,11 +1,15 @@
 import { BranchesOutlined, PlusOutlined } from '@ant-design/icons';
-import { Button, Divider, Empty, Typography } from 'antd';
+import { Button, Divider, Empty, Tabs, Typography } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import StepTimeline from '../components/StepTimeline';
+import TestSuiteContent from '../components/TestSuiteContent';
 import { Flow, Step, Project } from '../services/models';
 import notificationService from '../services/notification_service';
 import storageService from '../services/storage_service';
+import testSuiteService, {
+  TestSuiteState,
+} from '../services/test_suite_service';
 
 const { Title, Text } = Typography;
 
@@ -15,6 +19,9 @@ export default function FlowDetails() {
   const [flow, setFlow] = useState<Flow | null>(null);
   const [project, setProject] = useState<Project | null>(null);
   const [steps, setSteps] = useState<Step[]>([]);
+  const [activeTab, setActiveTab] = useState<string>('steps');
+  const [generationState, setGenerationState] =
+    useState<TestSuiteState>('idle');
 
   // Load flow and steps data on component mount
   useEffect(() => {
@@ -41,6 +48,11 @@ export default function FlowDetails() {
       // Get steps for this flow
       const flowSteps = storageService.getStepsByFlow(id);
       setSteps(flowSteps);
+
+      // Get the current generation state
+      if (id) {
+        setGenerationState(testSuiteService.getState(id));
+      }
     } catch (error) {
       notificationService.handleError(
         error,
@@ -50,9 +62,37 @@ export default function FlowDetails() {
     }
   }, [id, navigate]);
 
+  // Listen for test suite generation state changes
+  useEffect(() => {
+    if (!id) return;
+
+    const handleStateChange = (flowId: string, state: TestSuiteState) => {
+      if (flowId === id) {
+        setGenerationState(state);
+
+        // Automatically switch to the test suite tab when generation completes
+        if (state === 'completed' && activeTab !== 'testSuite') {
+          setActiveTab('testSuite');
+        }
+      }
+    };
+
+    testSuiteService.on('stateChange', handleStateChange);
+
+    return () => {
+      testSuiteService.removeListener('stateChange', handleStateChange);
+    };
+  }, [id, activeTab]);
+
   const goToStepCreation = () => {
     if (flow) {
       navigate(`/flows/${flow.id}/steps/configure`);
+    }
+  };
+
+  const handleGenerateTestSuite = () => {
+    if (flow && id) {
+      testSuiteService.generateTestSuite(id);
     }
   };
 
@@ -81,14 +121,9 @@ export default function FlowDetails() {
           )}
           <Button
             type="primary"
-            onClick={() => {
-              // Placeholder for generate test suite functionality
-              notificationService.notify(
-                'info',
-                'Test suite generation coming soon',
-              );
-            }}
-            disabled={steps.length === 0}
+            onClick={handleGenerateTestSuite}
+            disabled={steps.length === 0 || generationState === 'generating'}
+            loading={generationState === 'generating'}
           >
             Generate Test Suite
           </Button>
@@ -105,13 +140,39 @@ export default function FlowDetails() {
         </Button>
       </div>
 
-      <Divider />
+      {!steps.length && <Divider />}
 
-      <div className="flex-1 relative">
-        <div className="absolute inset-0 overflow-y-auto">
-          {steps.length > 0 ? (
-            <StepTimeline steps={steps} readOnly />
-          ) : (
+      <div className="flex-1 relative flow-details-tabs">
+        {steps.length > 0 ? (
+          <Tabs
+            activeKey={activeTab}
+            onChange={setActiveTab}
+            items={[
+              {
+                key: 'steps',
+                label: 'Steps',
+                children: (
+                  <div className="absolute inset-0 overflow-y-auto">
+                    <StepTimeline steps={steps} readOnly />
+                  </div>
+                ),
+              },
+              {
+                key: 'testSuite',
+                label: 'Test Suite',
+                children: (
+                  <div className="absolute inset-0 overflow-y-auto">
+                    <TestSuiteContent
+                      flowId={id || ''}
+                      onGenerateClick={handleGenerateTestSuite}
+                    />
+                  </div>
+                ),
+              },
+            ]}
+          />
+        ) : (
+          <div className="absolute inset-0 overflow-y-auto">
             <Empty
               description="No steps found"
               image={Empty.PRESENTED_IMAGE_SIMPLE}
@@ -129,8 +190,8 @@ export default function FlowDetails() {
                 Add Your First Step
               </Button>
             </Empty>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -32,3 +32,8 @@ body,
 }
 
 @import 'tailwindcss';
+
+.flow-details-tabs .ant-tabs,
+.flow-details-tabs .ant-tabs-content {
+  height: 100%;
+}
