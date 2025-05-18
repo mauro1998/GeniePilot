@@ -200,7 +200,7 @@ class StorageService {
     // Create step
     this.saveStep({
       flowId: flow.id,
-      name: 'Initial Step',
+      name: 'Step 1',
       context: '',
       imageUrl: blobUrl,
     });

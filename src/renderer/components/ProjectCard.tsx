@@ -63,7 +63,6 @@ export default function ProjectCard({
       key={project.id}
       className="bg-[#1f1f1f] hover:shadow-lg cursor-pointer transition-all duration-300 border border-gray-800 hover:border-blue-700"
       onClick={handleCardClick}
-      bodyStyle={{ padding: '16px' }}
     >
       <div className="flex flex-col h-full">
         <div className="mb-2 flex justify-between items-start">
