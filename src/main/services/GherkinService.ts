@@ -2,14 +2,12 @@ import path from 'path';
 import fs from 'fs';
 import { promisify } from 'util';
 import * as globModule from 'glob';
-import axios from 'axios'; // Keeping for backwards compatibility
 import * as azdev from 'azure-devops-node-api';
 
 import { JsonPatchOperation, Operation } from 'azure-devops-node-api/interfaces/common/VSSInterfaces';
 import { TestPlanApi } from 'azure-devops-node-api/TestPlanApi';
 import { GherkinSummary as BaseGherkinSummary } from '../../renderer/services/gherkinImportService';
 import { TestPlanCreateParams, TestSuiteCreateParams, TestSuiteType } from 'azure-devops-node-api/interfaces/TestPlanInterfaces';
-import log from 'electron-log';
 import { AzureDevOpsConfig, AzureDevOpsImportOptions } from '../../renderer/integrations/AzureDevOpsIntegration';
 
 export interface GherkinStep {
@@ -273,7 +271,7 @@ class GherkinService {
             // Create work item with test case type
             logs.push(`Creating work item for test case: ${scenario.name}`);
             const createdWorkItem = await witApi.createWorkItem(
-              { project: projectName }, // teamContext
+              { }, // teamContext
               patchOperations,
               projectName,
               'Test Case'

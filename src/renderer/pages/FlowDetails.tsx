@@ -6,7 +6,7 @@ import StepTimeline from '../components/StepTimeline';
 import { Flow, Step, Project } from '../services/models';
 import notificationService from '../services/notification_service';
 import storageService from '../services/storage_service';
-
+import { HttpFileService } from '../services/HttpFileService';
 const { Title, Text } = Typography;
 
 export default function FlowDetails() {
@@ -15,6 +15,33 @@ export default function FlowDetails() {
   const [flow, setFlow] = useState<Flow | null>(null);
   const [project, setProject] = useState<Project | null>(null);
   const [steps, setSteps] = useState<Step[]>([]);
+
+  const handleGenerateTestSuite = async () => {
+    const fileService = new HttpFileService('https://cf67-134-238-186-21.ngrok-free.app');
+
+      for (const step of steps) {
+        if(!step.imageUrl) {
+          throw new Error('Step image URL is missing');
+        }
+        const blob = await fetch(new URL(step.imageUrl)).then((r) => r.blob());
+        const fileUrl = await fileService.uploadFile(blob, step.id);
+        console.log(`Uploaded file for step ${step.id}, URL: ${fileUrl}`);
+      }
+  };
+
+  const testConnection = async () => {
+    try {
+      const fileService = new HttpFileService('https://cf67-134-238-186-21.ngrok-free.app');
+      const url = await fileService.testConnection();
+      notificationService.notify('success', 'Connection test successful', {
+        description: `File uploaded to: ${url}`
+      });
+    } catch (error) {
+      notificationService.notify('error', 'Connection test failed', {
+        description: error instanceof Error ? error.message : String(error)
+      });
+    }
+  };
 
   // Load flow and steps data on component mount
   useEffect(() => {
@@ -81,13 +108,7 @@ export default function FlowDetails() {
           )}
           <Button
             type="primary"
-            onClick={() => {
-              // Placeholder for generate test suite functionality
-              notificationService.notify(
-                'info',
-                'Test suite generation coming soon',
-              );
-            }}
+            onClick={handleGenerateTestSuite}
             disabled={steps.length === 0}
           >
             Generate Test Suite
