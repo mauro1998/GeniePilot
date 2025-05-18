@@ -20,14 +20,16 @@ interface SourceSectionProps {
   sourceType: 'screen' | 'window';
 }
 
-const SourceSection: React.FC<SourceSectionProps> = ({
+export default function SourceSection({
   title,
   sources,
   selectedSourceId,
   onSourceSelect,
   sourceType,
-}) => {
-  const filteredSources = sources.filter((source) => source.type === sourceType);
+}: SourceSectionProps) {
+  const filteredSources = sources.filter(
+    (source) => source.type === sourceType,
+  );
 
   if (filteredSources.length === 0) {
     return null;
@@ -35,8 +37,10 @@ const SourceSection: React.FC<SourceSectionProps> = ({
 
   return (
     <div className={sourceType === 'screen' ? 'mb-4' : ''}>
-      <Text strong className="text-base mb-2 block">{title}</Text>
-      <div className="grid grid-cols-2 gap-3">
+      <Text strong className="text-base mb-2 block">
+        {title}
+      </Text>
+      <div className="grid grid-cols-4 gap-3">
         {filteredSources.map((source) => (
           <ThumbnailSelector
             key={source.id}
@@ -48,6 +52,4 @@ const SourceSection: React.FC<SourceSectionProps> = ({
       </div>
     </div>
   );
-};
-
-export default SourceSection;
+}

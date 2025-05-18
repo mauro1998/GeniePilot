@@ -1,13 +1,13 @@
-import { PlusOutlined, CameraOutlined, EditOutlined } from '@ant-design/icons';
-import { Button, Divider, Empty, Typography, List, Card } from 'antd';
+import { BranchesOutlined, PlusOutlined } from '@ant-design/icons';
+import { Button, Divider, Empty, Typography } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import StepFormDialog from '../components/StepFormDialog';
+import StepTimeline from '../components/StepTimeline';
 import { Flow, Step, Project } from '../services/models';
 import notificationService from '../services/notification_service';
 import storageService from '../services/storage_service';
 
-const { Title, Text, Paragraph } = Typography;
+const { Title, Text } = Typography;
 
 export default function FlowDetails() {
   const { id } = useParams<{ id: string }>();
@@ -15,7 +15,6 @@ export default function FlowDetails() {
   const [flow, setFlow] = useState<Flow | null>(null);
   const [project, setProject] = useState<Project | null>(null);
   const [steps, setSteps] = useState<Step[]>([]);
-  const [isStepModalOpen, setIsStepModalOpen] = useState(false);
 
   // Load flow and steps data on component mount
   useEffect(() => {
@@ -51,19 +50,9 @@ export default function FlowDetails() {
     }
   }, [id, navigate]);
 
-  const handleStepCreated = (newStep: Step) => {
-    setSteps([...steps, newStep]);
-
-    // Update the flow in state to include the new step
+  const goToStepCreation = () => {
     if (flow) {
-      const updatedFlow = {
-        ...flow,
-        steps: [...flow.steps, newStep],
-      };
-      setFlow(updatedFlow);
-
-      // Also update in storage
-      storageService.updateFlow(updatedFlow);
+      navigate(`/flows/${flow.id}/steps/create`);
     }
   };
 
@@ -73,116 +62,76 @@ export default function FlowDetails() {
 
   return (
     <div className="flex flex-col flex-1">
+      <div className="flex justify-between items-center mb-4">
+        <div className="flex items-center">
+          <BranchesOutlined className="text-2xl mr-2 text-green-500" />
+          <Title level={2} className="!m-0">
+            {flow.name} — Flow
+          </Title>
+        </div>
+        <div className="flex space-x-3">
+          {steps.length > 0 && (
+            <Button
+              type="default"
+              icon={<PlusOutlined />}
+              onClick={goToStepCreation}
+            >
+              Configure Steps
+            </Button>
+          )}
+          <Button
+            type="primary"
+            onClick={() => {
+              // Placeholder for generate test suite functionality
+              notificationService.notify(
+                'info',
+                'Test suite generation coming soon',
+              );
+            }}
+            disabled={steps.length === 0}
+          >
+            Generate Test Suite
+          </Button>
+        </div>
+      </div>
+
       <div className="flex justify-start items-center">
         <Button
           type="link"
           onClick={() => navigate(`/projects/${project.id}`)}
-          className="p-0 mb-2"
+          className="p-0"
         >
-          ← Back to {project.name}
-        </Button>
-      </div>
-      <div className="flex justify-between items-center">
-        <Title level={2} className="!m-0">
-          {flow.name}
-        </Title>
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          onClick={() => setIsStepModalOpen(true)}
-        >
-          Add Step
+          ← Back to project {project.name}
         </Button>
       </div>
 
       <Divider />
 
-      <div className="flex-1">
-        {steps.length > 0 ? (
-          <List
-            grid={{
-              gutter: 16,
-              xs: 1,
-              sm: 2,
-              md: 3,
-              lg: 3,
-              xl: 4,
-              xxl: 4,
-            }}
-            dataSource={steps}
-            renderItem={(step) => (
-              <List.Item>
-                <Card
-                  hoverable
-                  cover={
-                    step.imageUrl ? (
-                      <img
-                        alt={step.name}
-                        src={step.imageUrl}
-                        style={{ height: 200, objectFit: 'cover' }}
-                      />
-                    ) : (
-                      <div
-                        className="flex flex-col items-center justify-center bg-gray-100"
-                        style={{ height: 200 }}
-                      >
-                        <Text type="secondary">No image</Text>
-                        <Text type="secondary" className="text-xs mt-1">
-                          Use capture or upload options to add a screenshot
-                        </Text>
-                      </div>
-                    )
-                  }
-                  actions={[
-                    <Button type="text" key="capture" icon={<CameraOutlined />}>
-                      Capture
-                    </Button>,
-                    <Button type="text" key="edit" icon={<EditOutlined />}>
-                      Edit
-                    </Button>,
-                  ]}
-                >
-                  <Card.Meta
-                    title={step.name}
-                    description={
-                      step.context ? (
-                        <Paragraph ellipsis={{ rows: 2 }}>
-                          {step.context}
-                        </Paragraph>
-                      ) : (
-                        <Text type="secondary">No description</Text>
-                      )
-                    }
-                  />
-                </Card>
-              </List.Item>
-            )}
-          />
-        ) : (
-          <Empty
-            description="No steps found"
-            image={Empty.PRESENTED_IMAGE_SIMPLE}
-          >
-            <Text className="mb-4 block">
-              Steps represent individual screens or actions in your flow.
-            </Text>
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={() => setIsStepModalOpen(true)}
+      <div className="flex-1 relative">
+        <div className="absolute inset-0 overflow-y-auto">
+          {steps.length > 0 ? (
+            <StepTimeline steps={steps} readOnly />
+          ) : (
+            <Empty
+              description="No steps found"
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
             >
-              Add Your First Step
-            </Button>
-          </Empty>
-        )}
+              <Text className="mb-4 block">
+                Steps represent individual screens or actions in your flow.
+                <br />
+                Configure steps before generating a test suite.
+              </Text>
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={goToStepCreation}
+              >
+                Add Your First Step
+              </Button>
+            </Empty>
+          )}
+        </div>
       </div>
-
-      <StepFormDialog
-        visible={isStepModalOpen}
-        flowId={flow.id}
-        onClose={() => setIsStepModalOpen(false)}
-        onStepCreated={handleStepCreated}
-      />
     </div>
   );
 }

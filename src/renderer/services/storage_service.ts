@@ -178,6 +178,35 @@ class StorageService {
       .sort((a, b) => b.createdAt - a.createdAt)
       .slice(0, limit);
   }
+
+  /**
+   * Creates a default project with a default flow and step
+   * @returns The created project
+   */
+  createDefaultFlow(blobUrl: string): Flow {
+    // Create project
+    const project = this.saveProject({
+      name: 'New Project',
+      description: '',
+    });
+
+    // Create flow
+    const flow = this.saveFlow({
+      projectId: project.id,
+      name: 'Main Flow',
+      steps: [],
+    });
+
+    // Create step
+    this.saveStep({
+      flowId: flow.id,
+      name: 'Initial Step',
+      context: '',
+      imageUrl: blobUrl,
+    });
+
+    return flow;
+  }
 }
 
 export default new StorageService();
