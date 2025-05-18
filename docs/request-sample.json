@@ -1,0 +1,41 @@
+{
+  "project": "sample-project",
+  "description": "sample description",
+  "scenarios": [
+    {
+      "id": "parent-id",
+      "name": "parent-scenario",
+      "description": "parent scenario description",
+      "steps": [
+        {
+          "order": 1,
+          "context": "parent step description 1",
+          "image": "https://example.com/parent-image1.png"
+        },
+        {
+          "order": 2,
+          "context": "parent step description 2",
+          "image": "https://example.com/parent-image2.png"
+        }
+      ]
+    },
+    {
+      "id": "sample-id",
+      "parentId": "parent-id",
+      "name": "sample-scenario",
+      "description": "sample scenario description",
+      "steps": [
+        {
+          "order": 1,
+          "context": "sample step description 1",
+          "image": "https://example.com/sample-image1.png"
+        },
+        {
+          "order": 2,
+          "context": "sample step description 2",
+          "image": "https://example.com/sample-image2.png"
+        }
+      ]
+    }
+  ]
+}

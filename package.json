@@ -105,6 +105,7 @@
     "@electron/notarize": "^3.0.0",
     "antd": "^5.25.1",
     "axios": "^0.21.4",
+    "azure-devops-node-api": "^14.1.0",
     "d3": "^7.9.0",
     "electron-debug": "^4.1.0",
     "electron-log": "^5.3.2",
