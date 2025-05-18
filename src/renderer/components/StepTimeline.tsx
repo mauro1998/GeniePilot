@@ -1,9 +1,9 @@
 import React from 'react';
 import { Timeline, Typography, Button, Tooltip, Popconfirm, Space } from 'antd';
 import {
-  ClockCircleOutlined,
   EditOutlined,
   DeleteOutlined,
+  CheckCircleOutlined,
 } from '@ant-design/icons';
 import { Step } from '../services/models';
 
@@ -40,17 +40,15 @@ export default function StepTimeline({
           label: (
             <div className="mb-2">
               <Text strong>Step {index + 1}</Text>
-              {step.context && (
-                <Paragraph
-                  ellipsis={{ rows: 2 }}
-                  className="mt-1 text-sm text-gray-600"
-                >
-                  {step.context}
-                </Paragraph>
-              )}
+              <Paragraph
+                ellipsis={{ rows: 2 }}
+                className="mt-1 text-sm text-gray-600"
+              >
+                {step.context || 'Screenshot with no context'}
+              </Paragraph>
             </div>
           ),
-          dot: <ClockCircleOutlined className="timeline-clock-icon" />,
+          dot: <CheckCircleOutlined className="timeline-clock-icon" />,
           children: (
             <div
               className="mb-6"

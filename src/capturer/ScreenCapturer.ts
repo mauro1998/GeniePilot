@@ -21,7 +21,9 @@ export class ScreenCapturer {
    * @param sourceType Optional filter for source type ('screen', 'window', or null for both)
    * @returns Promise resolving to an array of capture sources
    */
-  async getSources(sourceType: 'screen' | 'window' | null = null): Promise<CaptureSource[]> {
+  async getSources(
+    sourceType: 'screen' | 'window' | null = null,
+  ): Promise<CaptureSource[]> {
     try {
       // Determine which types to request based on the sourceType parameter
       const types: Array<'window' | 'screen'> = [];
@@ -45,7 +47,9 @@ export class ScreenCapturer {
 
       const mappedSources = sources.map((source: DesktopCapturerSource) => {
         // Explicitly type the source type as a union type
-        const sourceType: 'screen' | 'window' = source.id.includes('screen') ? 'screen' : 'window';
+        const sourceType: 'screen' | 'window' = source.id.includes('screen')
+          ? 'screen'
+          : 'window';
 
         return {
           id: source.id,
@@ -59,7 +63,7 @@ export class ScreenCapturer {
 
       // If sourceType is specified, apply additional filtering to ensure accuracy
       if (sourceType) {
-        return mappedSources.filter(source => source.type === sourceType);
+        return mappedSources.filter((source) => source.type === sourceType);
       }
 
       return mappedSources;
@@ -82,12 +86,14 @@ export class ScreenCapturer {
           mandatory: {
             chromeMediaSource: 'desktop',
             chromeMediaSourceId: sourceId,
-          }
+          },
         },
       };
 
       // Cast constraints to any to handle Electron's specific constraints structure
-      const stream = await navigator.mediaDevices.getUserMedia(constraints as any);
+      const stream = await navigator.mediaDevices.getUserMedia(
+        constraints as any,
+      );
       return stream;
     } catch (error) {
       console.error('Error capturing source:', error);
@@ -106,7 +112,7 @@ export class ScreenCapturer {
    */
   private async processVideoFrame(
     video: HTMLVideoElement,
-    stream: MediaStream
+    stream: MediaStream,
   ): Promise<string> {
     const canvas = document.createElement('canvas');
     canvas.width = video.videoWidth;
@@ -120,7 +126,7 @@ export class ScreenCapturer {
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
     // Stop all tracks
-    stream.getTracks().forEach(track => track.stop());
+    stream.getTracks().forEach((track) => track.stop());
 
     // Return the base64 image data
     return canvas.toDataURL('image/png');
@@ -171,8 +177,8 @@ export class ScreenCapturer {
    */
   async findSourceByName(name: string): Promise<CaptureSource | undefined> {
     const sources = await this.getSources();
-    return sources.find(source =>
-      source.name.toLowerCase().includes(name.toLowerCase())
+    return sources.find((source) =>
+      source.name.toLowerCase().includes(name.toLowerCase()),
     );
   }
 

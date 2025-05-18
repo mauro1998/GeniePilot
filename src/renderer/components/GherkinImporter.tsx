@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button, message, Form, Input, Card, Spin, Select, Typography, Tag, Space } from 'antd';
 import { ImportOutlined, FolderOpenOutlined, ApiOutlined } from '@ant-design/icons';
-import GherkinImportService from '../services/gherkinImportService';
+import GherkinImportService from '../services/gherkin_import_service';
 import integrationsManager from '../integrations/IntegrationsManager';
 import IntegrationSelectorModal from './IntegrationSelectorModal';
 import { BaseIntegrationConfig, IntegrationProvider } from '../integrations/IntegrationProvider';

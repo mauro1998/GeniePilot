@@ -1,8 +1,3 @@
-/* eslint globimport { resolveHtmlPath } from './util';
-import { registerScreenCapturerHandlers } from './screenCapturerHandlers';
-import { registerFileSystemHandlers } from './fileSystemHandlers';
-import { registerGherkinIpcHandlers } from './ipc/gherkinIpcHandlers';require: off, no-console: off, promise/always-return: off */
-
 /**
  * This module executes inside of electron's main process. You can start
  * electron renderer process from here and communicate with the other processes
@@ -150,5 +145,6 @@ app
       // dock icon is clicked and there are no other windows open.
       if (mainWindow === null) createWindow();
     });
+    return null;
   })
   .catch(console.log);

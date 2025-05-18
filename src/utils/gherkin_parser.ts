@@ -77,16 +77,21 @@ class GherkinParser {
    * @param {string} extension - File extension to look for (default: .feature)
    * @returns {Array<ParsedGherkinFile>} Array of parsed gherkin content
    */
-  parseDirectory(directoryPath: string, extension: string = '.feature'): ParsedGherkinFile[] {
+  parseDirectory(
+    directoryPath: string,
+    extension: string = '.feature',
+  ): ParsedGherkinFile[] {
     try {
       const files = fs.readdirSync(directoryPath);
-      const gherkinFiles = files.filter(file => path.extname(file) === extension);
+      const gherkinFiles = files.filter(
+        (file) => path.extname(file) === extension,
+      );
 
-      return gherkinFiles.map(file => {
+      return gherkinFiles.map((file) => {
         const filePath = path.join(directoryPath, file);
         return {
           fileName: file,
-          content: this.parseFile(filePath)
+          content: this.parseFile(filePath),
         };
       });
     } catch (error) {
@@ -104,25 +109,27 @@ class GherkinParser {
     const testCases: GherkinTestCase[] = [];
 
     if (gherkinDocument && gherkinDocument.feature) {
-      const feature = gherkinDocument.feature;
+      const { feature } = gherkinDocument;
 
       if (feature.children && feature.children.length > 0) {
-        feature.children.forEach(child => {
+        feature.children.forEach((child) => {
           if (child.scenario) {
-            const scenario = child.scenario;
+            const { scenario } = child;
 
-            const steps = scenario.steps.map(step => {
+            const steps = scenario.steps.map((step) => {
               return {
                 type: step.keyword.trim(),
-                text: step.text
+                text: step.text,
               };
             });
 
             testCases.push({
               name: scenario.name,
               description: scenario.description || feature.description || '',
-              tags: [...(feature.tags || []), ...(scenario.tags || [])].map(tag => tag.name),
-              steps: steps
+              tags: [...(feature.tags || []), ...(scenario.tags || [])].map(
+                (tag) => tag.name,
+              ),
+              steps,
             });
           }
         });
